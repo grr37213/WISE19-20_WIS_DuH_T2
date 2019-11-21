@@ -1,1 +1,45 @@
 \section{Kommunikationskostenoptimierung}
+\hyphenation{High-Performance}
+\hyphenation{Per-for-mance}
+\hyphenation{Com-pu-ting}
+\hyphenation{Be-rech-nungs-eng-pass}
+Das Papier des Subjekts \cite{mainpaper} beschreibt in seinem dritten Kapitel strategien zur reduktion von Kommunikationskosten. Motiviert wird dies durch die Ergebnisse aus der Erfolgreichen GPU-Beschleunigung aus Kapitel 2.
+Wie \cite[Abb. 3]{mainpaper} zeigt hat sich die Zeit, welche im FFT algorithmus f"ur Kommunikation zwischen den GPU's/CPU's aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung ).\\
+
+Ein Berechnungsengpass durch Kommunikation von Applikationen in High Performance Computing (HPC) Projekten, welche mehrere Prozessoren involvieren, scheint ein h"aufiges und bekanntes Problem zu sein.
+%TODO quote references to similar bottlenecked projects
+Dies kann dadurch begr"undet werden, dass Kommunikation "ublichweise genau dann unvermeidbar ist, wenn rein serielle Anteile in der Applikation/im Algorithmus present sind. Solche rein seriellen Anteile sind nicht parallelisierbar und ihre ergebnisse werden f"ur weitere parallele Schritte ben"otigt, was Kommunikation in Multi-Prozessor-Systemen unvermeidbar macht.\\
+%TODO cite sources
+Um die Kommunikationskosten weiter zu optimieren steht eine Mischung aus folgenden Optionen zur Verf"ugung:
+\begin{enumerate}
+	\item Verwendung eines besseren Algorithmus hinsichtlich serieller Anteile und Kommunikation.
+	\item Verbesserung der Kommunikationsstrategie unter Einbeziehung von Eigenschaften der Systemarchitektur.
+\end{enumerate}
+
+Die Schnelle Fouriertransformation (FFT) ist ein sehr spezifischer Algorithmus, was Verfolgungsm"oglichkeiten von Option 1 stark einschr"ankt. Dies mag der Grund daf"ur sein, weshalb sich \cite{mainpaper} auf Option 2 konzentriert.
+
+\subsection{Systemarchitektur}
+\cite[Abb. 1]{mainpaper} zeigt die generelle Systemarchitektur des Summit Supercomputers in Oak Ridge National Laboratory(ORNL), auf den sich die vorgestellten Überlegungen im Papier zu relativieren scheinen. Die Grafik zeigt Knoten, welche "uber verschiedene Arten von Networking/Bussen verbunden sind. Diese verschiedenen Networking-Technologien gehen mit verschiedenen Übertragungseigenschaften (vorrangig Bandbreite einher). Ebenfalls zu erkennen is das Konzept eines Sockels (\textit{eng. socket}), welcher mehrere Prozessoren zusammenfasst. 
+\begin{defi}[\textit{same-socket-communication}]
+Ein Kommunikationsvorgang, welcher zwischen zwei Prozessoren unter dem selben Sockel erfolgt.
+\end{defi}
+\begin{defi}[\textit{cross-socket-communication}]
+Ein Kommunikationsvorgang, welcher zwischen zwei Prozessoren erfolgt, welche sich nicht gemeinsam auf einem Sockel befinden.
+\end{defi}
+\begin{defi}[Unidirektionale Kommunikation (\textit{ eng. unidirectional communication }]
+In einem abgeschlossenen Kommunikationsvorgang werden Daten ausschließlich von $p1$ nach $p2$ kommuniziert.
+\end{defi}
+\begin{defi}[Bidirektionale Kommunikation (\textit{ eng. bidirectional communication }]
+In einem abgeschlossenen Kommunikationsvorgang zwischen $p1$ und $p2$ können Daten sowohl von $p1$ nach $p2$, als auch von $p2$ nach $p1$ ausgetauscht werden.
+\end{defi}
+
+Innerhalb eines Sockels sind alle Prozessoren (7TF GPU's) Peer-to-Peer "uber die NVLINK Technologie verbunden (50GB/s Bandbreite). Same-Socket kommunikation k"onnte netzwerktopologisch also Gesamtinformation mit einer Bandbreite von $50Gb/s * \frac{p^2}{2}$ austauschen (Mit $p$ als die Anzahl der beteiligten Prozessoren auf dem Sockel). 
+Zwischen den Sockeln exisitiert ein X-Bus (64GB/s).
+Theoretisch k"onnen also maximal $\frac{64GB/s}{50GB/s} = 1.28$ Prozessoren cross-socket kommunizerien. Es entstehen demnach Kommunikationsengp"asse bei bestimmten Kommunikationsstrategien welche mehr cross-socket kommunikation ben"otigt.\\
+\cite{mainpaper} testet nun im folgenden einige Kommunikationsstrategien und Technologien.\\
+Genannt sind:
+\begin{enumerate}
+\item GPUDirect Peer to Peer (P2P)
+\item 
+
+
