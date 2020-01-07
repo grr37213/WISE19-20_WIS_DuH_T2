@@ -3,3 +3,22 @@
 *.aux
 main.pdf
 
+#tech stuff
+*.toc
+*.snm
+*.nav 
+*.out 
+*.vrb
+*.bbl 
+*.bcf 
+*.blg 
+*.run.xml
+*.acr
+*.glg 
+*.ist 
+*.alg 
+*.acn 
+*.gls 
+*.glsdefs 
+*.glo
+*.lof
