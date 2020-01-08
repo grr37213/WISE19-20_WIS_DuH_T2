@@ -3,42 +3,62 @@
 \hyphenation{Per-for-mance}
 \hyphenation{Com-pu-ting}
 \hyphenation{Be-rech-nungs-eng-pass}
-Das Papier \cite{mainpaper} beschreibt in seinem dritten Kapitel Strategien zur Reduktion von Kommunikationskosten. Motiviert wird dies durch die Ergebnisse aus der Erfolgreichen GPU-Beschleunigung aus Kapitel 2.
-Wie \cite[Abb. 3]{mainpaper} zeigt hat sich die Zeit, welche im FFT-Algorithmus f"ur Kommunikation zwischen den GPU's/CPU's aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich durch Parallelisierung mit GPUs beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung ).\\
+Das Papier \cite[Kap.3]{mainpaper} beschreibt in seinem dritten Kapitel Strategien zur Reduktion von Kommunikationskosten bei der Umsetzung der 3D-FFT in einer High-Performance Architektur.\\
 
-Ein Berechnungsengpass durch Kommunikation von Applikationen in High-Performance-Computing (HPC) Projekten, welche mehrere Prozessoren involvieren, scheint ein h"aufiges und bekanntes Problem zu sein.
-%TODO quote references to similar bottlenecked projects
-Kommunikation, konzeptionell, dient der Synchronisation von Prozessen. Für bestimmte, im Problem vorhandene Verarbeitungsschritte ist ein Datenaustausch nötig, um die auf den einzelnen Prozessen bekannten, neuen berechneten Wahrheiten zu verbreiten.\\
-Das macht Kommunikation hinsichtlich der beteiligten Prozesse oft zu einem inherent seriellen Problemanteil.\\
-Inherente serielle Anteile in einer Problemstellung limitieren den möglichen maximalen Speedup durch Parallelisierung.
-Diese Sachverhalte können am FFT-Problem durch die Einteilung in Phasen beobachtet werden. Zwischen jeder Berechnungsphase müssen die verwendeten 3D-Tensoren transponiert werden, wodurch neue Werte bei der Werteaufteilung in den Zuständigkeitsbereich anderer Prozesse fallen und müssen daher an diese kommuniziert werden, um die Berechnung fortzuführen.\\
+Die Kommunikation findet im High-Performance Kontext zwischen verschiedenen Prozessen/Prozessoren statt, deren lokale Daten aktualisiert werden m"ussen.\\
+Kommunikationskosten sind dabei die verwendeten Aufw"ande in Zeit f"ur Synchronisationsabschnitte zwischen einzelnen Datenverarbeitungsschritten.\\
+
+Durch die Ergebnisse aus dem vorigen Kapitel, in dem verschiedene M"oglichkeiten zur Umsetzung der 3D-FFT auf Grafikprozessoren behandelt werden, wird hier die genauere Betrachtung der Kommunikationskostenoptimierung motiviert.\\
+
+Die durch die Verwendung von GPU's erreichte Beschleunigung durch Parallelismus optimiert alle Programmanteile um ein vielfaches mit der Ausnahme der Kommunikation.\\
+
+\begin{figure}
+\centering
+  \includegraphics[width=\linewidth]{res/speedup.png}
+  \caption{\cite[Abb. 3]{mainpaper} Kreisdiagramme zur Visualisierung von Erfolgen und Bottlenecks bei der GPU Beschleunigung von 3D-FFT's}
+  \label{fig:speedup}
+\end{figure}
+
+Wie Abbildung \ref{fig:speedup} zeigt hat sich die Zeit, welche im FFT-Algorithmus f"ur Kommunikation zwischen den GPU's/CPU's aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich durch Parallelisierung mit GPUs beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung ).\\
+
+Prinzipiell ist Kommunikation ebenfalls parallelisierbar. Da Kommunikation jedoch der Verbreitung einer frisch errechneten, neuen Wahrheit auf anderen Prozessoren dient, h"angt der Grad der Parallelisierbarkeit direkt an der unmittelbaren Wichtigkeit dieser Wahrheit f"ur weitere Berechnungsschritte.\\
+Diese Eigenschaft macht Kommunikation hinsichtlich der beteiligten Prozesse oft zu einem inherent seriellen, d.h. in einem gewissen Grad nicht parallelisierbaren Problemanteil.\\
+Inherente serielle Anteile in einer Problemstellung limitieren den m"oglichen maximalen Speedup durch Parallelisierung der gesamten Applikation.\\
+Diese Sachverhalte k"onnen am FFT-Problem durch die Einteilung in Phasen beobachtet werden. Zwischen jeder Berechnungsphase m"ussen die verwendeten 3D-Tensoren transponiert werden, wodurch neue Werte bei der Werteaufteilung in den Zust"andigkeitsbereich anderer Prozesse fallen und m"ussen daher an diese kommuniziert werden, um die Berechnung fortzuf"uhren.\\
 %TODO cite sources
-Da Kommunikation unter dem vorgesetzten Ziel der Multi-Prozessorbeschleunigung der Applikation FFT unvermeidbar ist und die Kommunikation selbst zum Berechnungsengpass führt, muss weiter die Optimierung dieser Kommunikation behandelt werden.
+Da Kommunikation unter dem vorgesetzten Ziel der Multi-Prozessorbeschleunigung der Applikation FFT unvermeidbar ist und die Kommunikation selbst zum Berechnungsengpass f"uhrt, muss weiter die Optimierung dieser Kommunikation behandelt werden.
 
 
 \subsection{Systemarchitektur}
-\cite[Abb. 1]{mainpaper} zeigt die generelle Systemarchitektur des Summit Supercomputers in Oak Ridge National Laboratory(ORNL), zu dem sich die vorgestellten "Uberlegungen im Papier zu relativieren scheinen.\\
-Der Summit-Supercomputer im Oak Ridge National Laboratory, Tennessee, ist ein Multi-Prozessor-Supercomputer, der seit 2018 in Betrieb ist. Der Verwendungszweck des Rechners ist der Wissenschaft zugeschrieben.\\
+
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{res/architecture.png}
+\caption{\cite[Abb. 1]{mainpaper} Aufbau des Summit Supercomputers, verwendete Kommunikationstechnologien und Komponenten}
+	\label{fig:architecture}
+\end{figure}
+
+Abbildung \ref{fig:architecture} zeigt die generelle Systemarchitektur des Summit Supercomputers in Oak Ridge National Laboratory(ORNL), zu dem sich die vorgestellten "Uberlegungen im Papier zu relativieren scheinen.\\
+Der Summit-Supercomputer im Oak Ridge National Laboratory, Tennessee, ist ein Multi-Prozessor-Supercomputer, der seit 2018 in Betrieb ist. Der Verwendungszweck des Rechners ist der Wissenschaft zugeschrieben.
 \\
 Der Rechner besitzt 4608 Knoten, welche hybrid mit je 2 CPU's (IBM POWER9) und je 6 GPU's (NVIDIA Volta V100s). Die Knoten sind in einer Non-Blocking Fat Tree Topologie angelegt (vgl. \cite{osummit})\\
 \\
-Ein Fat-Tree ist eine Topologie, bei der Switches zu einem Binärbaum verknüpft werden. Endknoten, also Prozessoren, werden dabei an den Blättern des Baumes plaziert.\\
-Maßgeblich für den Fat-Tree ist dabei die Regel, dass für jeden Switch im System die Anzahl der Verbindungen nach unten, gleich der Anzahl der Verbindungen nach oben ist, also die eine Elter(n)verbindung gleich viele Verbindungen hat wie beide Kindverbindungen. Daraus folgt die Anzahl der Verbindungen pro switch in abhängigkeit der Baumhöhe $h$, maximaler Baumhöhe $h_{max}$, Der Höhe am Wurzelknoten $h_{root}=0$ und der Anzahl der Elternverbindung eines Blattknotens $c$ (hier: $c=1$):
+Ein Fat-Tree ist eine Topologie, bei der Switches zu einem Bin"arbaum verkn"upft werden. Endknoten, also Prozessoren, werden dabei an den Bl"attern des Baumes plaziert.\\
+Ma"sgeblich f"ur den Fat-Tree ist dabei die Regel, dass f"ur jeden Switch im System die Anzahl der Verbindungen nach unten, gleich der Anzahl der Verbindungen nach oben ist, also die eine Elter(n)verbindung gleich viele Verbindungen hat wie beide Kindverbindungen. Daraus folgt die Anzahl der Verbindungen pro switch in abh"angigkeit der Baumh"ohe $h$, maximaler Baumh"ohe $h_{max}$, Der H"ohe am Wurzelknoten $h_{root}=0$ und der Anzahl der Elternverbindung eines Blattknotens $c$ (hier: $c=1$):
 \begin{itemize}
 	\item Anzahl Elterverbindungen/Kindverbindungen : $(h_{max}+1-h)*c$
 	\item Anzahl Verbindungen pro Kind : $\frac{(h_{max}+1-h)*c}{2}$ bei 2 Kindern
 \end{itemize}
-Die Verbindungsanzahl ist daher maximal am Wurzelknoten mit $h_{max}+1$.
-
-Hält eine Fat-Tree Topologie das Verhältnis von Eltern- zu Kindverbindung von $1:1$ ein, nennt man diese Non-Blocking. Die Gegenteilige Blocking-Eigenschaft ist bei Nichteinhaltung festzustellen.\\
-Ist das Verhältnis unausgeglichen ist die Kommunikation durch den konkreten unausgeglichenen Switch limitiert. Zum Beispiel könnten doppelt so viele Kindverbindungen existieren als Elternverbindungen ($1:2)$. So können verhältnismäßig viele Kindknoten über den Switch zeitgleich kommunizieren, jedoch kann nur die Hälfte aller Kindkommunikation an Eltern weitergereicht werden. Man spricht bei diesem Beispiel von einem Blocking-Faktor von 2, Kind zu Eltern.\\
+Die Verbindungsanzahl ist daher maximal am Wurzelknoten mit $h_{max}+1$, der Baum wird nach oben hin \glqq dicker\grqq (\textit{fat}).
+H"alt eine Fat-Tree Topologie das Verh"altnis von Eltern- zu Kindverbindung von $1:1$ ein, nennt man diese Non-Blocking. Die Gegenteilige Blocking-Eigenschaft ist bei Nichteinhaltung festzustellen.\\
+Ist das Verh"altnis unausgeglichen ist die Kommunikation durch den konkreten unausgeglichenen Switch limitiert. Zum Beispiel k"onnten doppelt so viele Kindverbindungen existieren als Elternverbindungen ($1:2)$. So k"onnen verh"altnism"a"sig viele Kindknoten "uber den Switch zeitgleich kommunizieren, jedoch kann nur die H"alfte aller Kindkommunikation an Eltern weitergereicht werden. Man spricht bei diesem Beispiel von einem Blocking-Faktor von 2, Kind zu Eltern.\\
 \\
-Die Topologie erreicht durch die das exponentielle Wachstum des Binärbaumes mit der Baumtiefe schnell eine große Anzahl verknüpfbarer Prozessoren. (vgl. \cite{fattree})\\
+Die Topologie erreicht durch die das exponentielle Wachstum des Bin"arbaumes mit der Baumtiefe schnell eine gro"se Anzahl verkn"upfbarer Prozessoren. (vgl. \cite{fattree})\\
 \\
-Die Grafik \cite[Abb.1]{mainpaper} zeigt Knoten, welche "uber verschiedene Arten von Networking/Bussen verbunden sind. Diese verschiedenen Networking-Technologien gehen mit verschiedenen "Ubertragungseigenschaften (vorrangig Bandbreite) einher. Ebenfalls zu erkennen is das Konzept eines Sockels (\textit{eng. socket}), welcher mehrere Prozessoren zusammenfasst. 
+Die Grafik Abbildung \ref{fig:architecture} zeigt Knoten, welche "uber verschiedene Arten von Networking/Bussen verbunden sind. Diese verschiedenen Networking-Technologien gehen mit verschiedenen "Ubertragungseigenschaften (vorrangig Bandbreite) einher. Ebenfalls zu erkennen is das Konzept eines Sockels (\textit{eng. socket}), welcher mehrere Prozessoren zusammenfasst. 
 
 Alle Prozessoren sind mit dem Sockel Verbunden und dadurch zusammengefasst.
-Die NVLINK Technologie erlaubt 2 zusätzliche (50GB/s) Verbindungen zur Sockelverbindung. Diese Verbindungen sind P2P zu anderen Prozessoren(\cite[FAQ, What is NVLINK?]{osummit})
+Die NVLINK Technologie erlaubt 2 zus"atzliche (50GB/s) Verbindungen zur Sockelverbindung. Diese Verbindungen sind P2P zu anderen Prozessoren(\cite[FAQ, What is NVLINK?]{osummit})
 Mit 8 Prozessoren pro Sockel muss jedoch Sockelintern noch eine andere Topologie als P2P verwendet werden. \cite[Abb. 1]{mainpaper} suggeriert hier eine Ringtopologie.
 %TODO check if with NVLINK 50Gb is the speed set for bidirectional communication
 Zwischen den Sockeln exisitiert ein X-Bus (64GB/s).
@@ -64,7 +84,7 @@ In verteilten Systemen wird MPI als Abstraktion f"ur die Kommunikation zwischen 
 Die \textit{\textbf{C}ompute \textbf{U}nified \textbf{D}evice \textbf{A}rchitecture}, entwickelt von NVIDIA ist eine Plattform und Programmiermodell f"ur parallele Berechnungen auf NVIDIA GPUs. 
 
 \subsubsection{ CUDA-aware MPI }
-Ist eine Kombination aus CUDA und MPI. Da CUDA mit dem MPI Standard kompatibel ist, sind MPI-Implementierungen durch CUDA m"oglich. Die resultierende MPI-Implementierung ist plattformspezifischer und stellt dadurch in vielen Fällen eine bessere Umsetzung des MPI-Standards auf speziell NVIDIA GPUs dar.
+Ist eine Kombination aus CUDA und MPI. Da CUDA mit dem MPI Standard kompatibel ist, sind MPI-Implementierungen durch CUDA m"oglich. Die resultierende MPI-Implementierung ist plattformspezifischer und stellt dadurch in vielen F"allen eine bessere Umsetzung des MPI-Standards auf speziell NVIDIA GPUs dar.
 
 \subsection{Weitere Spezielle Terminologie}
 \subsubsection{Sockel \textit{(eng. socket)}}
@@ -120,16 +140,44 @@ Verwendete Strategien sind:
 	\item Summit MPI P2P
 \end{enumerate}
 Die Unterschiede sind nicht Algorithmisch. Die Untersuchung bezieht sich also auf die kommunikativen Eigenschaften der Systemarchitektur (Option 2).\\
-Ergebnis: Stategie 2 scheint f"ur geringer als 4 Knotenzahlen besser zu sein.
-Strategie 1 scheint generell jedoch besser zu skalieren und "ubernimmt bei mehr Knoten stark die F"uhrung.\\
+Ergebnis: Stategie 2 scheint f"ur geringer als 4 Knotenzahlen besser zu sein, sinkt jedoch sogar nacher weiter ab.
+Strategie 1 scheint generell jedoch besser zu skalieren und "ubernimmt bei mehr Knoten stark die F"uhrung. Es ist jedoch erwähnt, dass der Effekt ab 128 Knoten abnimmt, da nicht mehr genügend Parallelisierung für die verwendete Problemgröße vorherrscht.\\
 \cite{mainpaper} geht jedoch selbst weiter nicht auf eine m"ogliche Begr"undung ein.\\
-Spekulativ ist die Verteilung der Prozessorknoten in der Systemarchitektur verantwortlich. Der Summit Supercomputer verwaltet 6 GPU's pro Sockel (vgl. \cite{summit}), was bei einer ben"otigten Knotenanzahl von 4 Knoten nicht n"otigerweise zu einer cross-socket Kommunikation f"uhrt, welche sich negativ auf das Kommunikationsbild auswirken k"onnte. Innehalb eines Sockels bildet die Architektur selbst P2P Verbindungen ab.
+Spekulativ ist die Verteilung der Prozessorknoten in der Systemarchitektur verantwortlich. Die n"achstgr"o"sere Anzahl der in der Messung verwendeten Knoten ist 8. Der Summit Supercomputer verwaltet 6 GPU's pro Sockel (vgl. \cite{summit,osummit}), was bei einer ben"otigten Knotenanzahl von 4 Knoten nicht n"otigerweise zu einer cross-socket Kommunikation f"uhrt, welche sich negativ auf das Kommunikationsbild auswirken k"onnte. Bei 8 Knoten wird cross-socket Kommunikation unter der Pr"amisse, dass nur GPU's verwendet werden, jedoch unvermeidbar. Innehalb eines Sockels bietet die Systemarchitektur mehr m"oglichkeiten zur Kommunikation an, was den Unterschied von 4 zu 8 verwendeten Knoten erkl"aren k"onnte.
 
 \subsubsection{Ansatz 2}
-Die Kommunikation kann algorithmisch ge"andert werden (Option 1).\\ Der vorgestellte Algorithmus agiert in Phasen (Transform X, Transform Y, Transform Z, Move Back to Original) mit zugeh"origer Kommunikation. K"onnen die kommunikativen Anteile der Phasen zusammengefasst werden ergibt sich daraus weniger redundante serielle Kommunikation.\\
-Hier wird dies in Form von \textit{slab} Datenkomposition durchgef"uhrt. Prozesse erhalten dabei 2 Dimensionen des FFT-Input Datentensors. Dadurch werden weniger Informationen reduntant zwischen Phasen ausgetauscht (\textit{pencil} 4 Phasen, \textit{slab} 3 Phasen).\\
-Ein Prozess kann also 2 Phasen der FFT Berechnung ohne Kommunikation durchf"uhren. Theoretisch wurden demnach 25\% Kommunikationskosten eingespart.\\
+\begin{figure}
+\centering
+\includegraphics[width=0.6\textwidth]{res/algo.png}
+\caption{\cite[Abb. 2]{mainpaper} Prnizipieller Aufbau des 3D-FFT Algorithmus. }
+	\label{fig:algo}
+\end{figure}
 
+Die Kommunikation kann algorithmisch ge"andert werden (Option 1).\\
+Der zuerst vorgestellte Algorithmus agiert in folgenden Phasen:
+\begin{enumerate}
+	\item Transform X
+	\item Transform Y
+	\item Transform Z
+	\item Move Back to Original
+\end{enumerate}
+Zwischen den Phasen wird Kommuniziert. Die Kommunikation verh"alt sich zu den jeweiligen Phasen sequenziel, d.h. ist nicht mit einer Phase parallelisierbar, oder f"ahig zu Pipelining.\\
+Sichtbar wird dies in Abbildung \ref{fig:algo}.\\
+K"onnen die kommunikativen Anteile der Phasen zusammengefasst werden ergibt sich daraus weniger redundante serielle Kommunikation.\\
+Hier wird dies in Form von \textit{slab} Datenkomposition durchgef"uhrt.
+Zuvor erhielten Prozesse eine Dimension des 3D-FFT-Input Datentensors, auf dem eine 1D-FFT berechnet wird. Dann werden die Ergebnisse propagiert und dabei der Tensor Transformiert.\\
+F"ur diesen Ansatz erhalten Prozesse jedoch 2 Dimensionen des 3D-FFT-Input Datentensors. Demnach kann der Prozess beispielsweise folgenderma"sen abgehandelt werden:
+\begin{enumerate}
+	\item Berechne 1D-FFT auf allen Zeilen im bekannten 2D-Tensor. Die Ergebnisse sind implizit als neuer 2D Tensor zusammengef"ugt.
+	\item Berechne FFT's f"ur alle Spalten im Ergebnistensor.
+	\item Transform Z
+	\item Move Back to Original.
+\end{enumerate}
+Man beachte, dass Schritt 1 und 2 ohne zus"atzliche Kommunikation auskommen, da alle ben"otigten Informationen aus Schritt 1 in Schritt 2 bekannt sind.\\
+Dadurch wird ein Kommikationschritt komplett eingespart. Bei dem von Kommunikation erzeugten Overhead in vorgegangenen Experimenten ist ein Leistungsgewinn wahrscheinlich.
+Es werden weniger Informationen redundant zwischen Phasen ausgetauscht (\textit{pencil} 4 Phasen, \textit{slab} 3 Phasen).\\
+Ein Prozess kann also 2 Phasen der FFT Berechnung ohne Kommunikation durchf"uhren. Theoretisch wurden demnach 25\% Kommunikationskosten eingespart.\\
+\\
 Ein Problem dabei, auf den \cite{mainpaper} nicht eingeht, ist der quadratisch erh"ohte Speicherverbrauch pro Knoten, so wie der quadratisch erh"ohte Kommunikationsaufwand in der ersten Kommunikationsphase.\\
 K"onnen die Knoten diese quadratische Speicherlast tragen ist dieser Ansatz jedoch eine solide Option. Die quadratische Kommunikation scheint sich ebenfalls nicht in den sp"ater angebenen Werten f"ur die erreichten Speedups durch die Durchf"uhrung dieses Ansatzes widerzuspiegeln.
 
