@@ -19,7 +19,9 @@ Die durch die Verwendung von GPU's erreichte Beschleunigung durch Parallelismus 
   \label{fig:speedup}
 \end{figure}
 
-Wie Abbildung \ref{fig:speedup} zeigt hat sich die Zeit, welche im FFT-Algorithmus f"ur Kommunikation zwischen den GPU's/CPU's aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich durch Parallelisierung mit GPUs beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung ).\\
+Wie Abbildung \ref{fig:speedup} zeigt hat sich die Zeit, welche im FFT-Algorithmus f"ur Kommunikation zwischen den GPU's/CPU's aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich durch Parallelisierung mit GPUs beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung).\\
+\\
+Wird Kommunikationszeit mitbetrachtet ist die Beschleunigung $\frac{0.14s+0.17s+0.42s+0.72s}{0.017s+0.71s}=200,8\%$, also nur 2-fach.
 
 Prinzipiell ist Kommunikation ebenfalls parallelisierbar. Da Kommunikation jedoch der Verbreitung einer frisch errechneten, neuen Wahrheit auf anderen Prozessoren dient, h"angt der Grad der Parallelisierbarkeit direkt an der unmittelbaren Wichtigkeit dieser Wahrheit f"ur weitere Berechnungsschritte.\\
 Diese Eigenschaft macht Kommunikation hinsichtlich der beteiligten Prozesse oft zu einem inherent seriellen, d.h. in einem gewissen Grad nicht parallelisierbaren Problemanteil.\\
@@ -149,7 +151,7 @@ Spekulativ ist die Verteilung der Prozessorknoten in der Systemarchitektur veran
 \begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{res/algo.png}
-\caption{\cite[Abb. 2]{mainpaper} Prnizipieller Aufbau des 3D-FFT Algorithmus. }
+\caption{\cite[Abb. 2]{mainpaper} Prinzipieller Aufbau des 3D-FFT Algorithmus. }
 	\label{fig:algo}
 \end{figure}
 
