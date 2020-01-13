@@ -11,7 +11,6 @@
 		\centering
 		\includegraphics[width=\linewidth, keepaspectratio]{../res/speedup.png}
 	\end{figure}
-
 	\begin{itemize}
 		\item $\frac{0.14s+0.17s+0.42s+0.72s}{0.017s+0.71s}=200,8\% \rightarrow$  2-fache Beschleunigung
 		\item Kommunikationszeit nur vernachlässigbare Änderung
@@ -37,12 +36,45 @@
 }
 \frame
 {
+	\frametitle{Systemarchitektur}
+	\begin{figure}[h!]
+		\centering
+		\begin{subfigure}[t]{0.3\linewidth}
+			\includegraphics[width=1\linewidth]{../res/fat_tree.png}
+			\footnotemark[1]
+		\end{subfigure}
+~
+		\begin{subfigure}[t]{0.6\linewidth}
+			\includegraphics[width=1\linewidth]{../res/architecture.png}
+			\footnotemark[2]
+		\end{subfigure}
+	\end{figure}
+
+\footnotetext[1]{\tiny\url{https://clusterdesign.org/fat-trees/} am 6.2.2019\normalsize}
+\footnotetext[2]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
+\normalsize
+}
+\frame
+{
+	\frametitle{Ansatz 0}
+	Benchmarks zur Ermittlung der tatsächlichen Bandbreite.
+	\begin{figure}[h!]
+		\centering
+		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/bench0.png}
+	\footnotemark[1]
+	\end{figure}
+\footnotetext[1]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
+}
+\frame
+{
 	\frametitle{Ansatz 1}
 	Nach Option2: Untersuchung Kommunikativer Eigenschaften der Systemarchitektur
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.7\linewidth, keepaspectratio]{./res/bench.png}
+		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/bench.png}
+		\footnotemark[1]
 	\end{figure}
+\footnotetext[1]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
 }
 \frame
 {
@@ -51,10 +83,13 @@
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/algo.png}
+		\footnotemark[1]
 	\end{figure}
 	1D\textit{pencil} $\rightarrow$ 2D\textit{slabs} Übertragungsgröße
 	$(TransformX,TransformY,TransformZ,MoveBack)\rightarrow(TransformY,TransformZ,MoveBack)$
 	Theretisch: $25\%$ Ersparnis
+
+\footnotetext[1]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
 }
 
 \frame
@@ -62,7 +97,26 @@
 	\frametitle{Ansatz 2}
 	\begin{figure}[h!]
 		\centering
-		\includegraphics[width=0.7\linewidth, keepaspectratio]{./res/bench2.png}
+		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/bench2.png}
+		\footnotemark[1]
 	\end{figure}
 	Nachteil: Quadratischer Speicherverbrauch pro Knoten
+	
+\footnotetext[1]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
+}
+\frame
+{
+	\frametitle{Ansatz 3}
+	Dynamische Analysen hinsichtlich
+	\begin{itemize}
+		\item Speicherverbrauch
+		\item Rechenlast
+	\end{itemize}
+	zur optimalen Auslastung und Aufteilung auf die Einheiten von Rechenressourcen 
+	\begin{enumerate}
+		\item{Knoten}
+		\item{Sockel}
+		\item{Prozessor}
+	\end{enumerate}
+	$\implies$ Vermeidung unnötiger Kommunikation.
 }
