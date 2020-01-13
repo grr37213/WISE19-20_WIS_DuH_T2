@@ -15,27 +15,26 @@ Die durch die Verwendung von GPU's erreichte Beschleunigung durch Parallelismus 
 \begin{figure}
 \centering
   \includegraphics[width=\linewidth]{res/speedup.png}
-  \caption{\cite[Abb. 3]{mainpaper} Kreisdiagramme zur Visualisierung von Erfolgen und Bottlenecks bei der GPU Beschleunigung von 3D-FFT's}
+  \caption{\cite[Abb. 3]{mainpaper} Kreisdiagramme zur Visualisierung von Erfolgen und Bottlenecks bei der GPU Beschleunigung von 3D-FFTs}
   \label{fig:speedup}
 \end{figure}
 
-Wie Abbildung \ref{fig:speedup} zeigt hat sich die Zeit, welche im FFT-Algorithmus f"ur Kommunikation zwischen den GPU's/CPU's aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich durch Parallelisierung mit GPUs beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung).\\
+Wie Abbildung \ref{fig:speedup} zeigt hat sich die Zeit, welche im FFT-Algorithmus f"ur Kommunikation zwischen den GPU's/CPUs aufgewendet wird, nur vernachl"assigbar ver"andert. Alle anderen Aktionen (Unpacking, Processing, Packing) haben sich erheblich durch Parallelisierung mit GPUs beschleunigt ($ \frac{0.74s}{0.017s} \approx 43.5$-fache Beschleunigung).\\
 \\
 Wird Kommunikationszeit mitbetrachtet ist die Beschleunigung $\frac{0.14s+0.17s+0.42s+0.72s}{0.017s+0.71s}=200,8\%$, also nur 2-fach.
 
 Prinzipiell ist Kommunikation ebenfalls parallelisierbar. Da Kommunikation jedoch der Verbreitung einer frisch errechneten, neuen Wahrheit auf anderen Prozessoren dient, h"angt der Grad der Parallelisierbarkeit direkt an der unmittelbaren Wichtigkeit dieser Wahrheit f"ur weitere Berechnungsschritte.\\
-Diese Eigenschaft macht Kommunikation hinsichtlich der beteiligten Prozesse oft zu einem inherent seriellen, d.h. in einem gewissen Grad nicht parallelisierbaren Problemanteil.\\
+Diese Eigenschaft macht Kommunikation hinsichtlich der beteiligten Prozesse oft zu einem inherent seriellen, d.h.~in einem gewissen Grad nicht parallelisierbaren Problemanteil.\\
 Inherente serielle Anteile in einer Problemstellung limitieren den m"oglichen maximalen Speedup durch Parallelisierung der gesamten Applikation.\\
-Diese Sachverhalte k"onnen am FFT-Problem durch die Einteilung in Phasen beobachtet werden. Zwischen jeder Berechnungsphase m"ussen die verwendeten 3D-Tensoren transponiert werden, wodurch neue Werte bei der Werteaufteilung in den Zust"andigkeitsbereich anderer Prozesse fallen und m"ussen daher an diese kommuniziert werden, um die Berechnung fortzuf"uhren.\\
-%TODO cite sources
+Diese Sachverhalte k"onnen am FFT-Problem bei der Einteilung in Phasen beobachtet werden: In einer Phase werden auf $N$ Prozessen insgesamt $N$ \textit{Pencil}s berechnet. Die Input-\textit{Pencil}s für die folgende Phase setzten sich aus den Teilergebnissen dieses Schrittes zusammen. Es müssen demnach für die n"achste Phase alle Ergebnisse der vorigen Phase bereits verfügbar sein.\\
 Da Kommunikation unter dem vorgesetzten Ziel der Multi-Prozessorbeschleunigung der Applikation FFT unvermeidbar ist und die Kommunikation selbst zum Berechnungsengpass f"uhrt, muss weiter die Optimierung dieser Kommunikation behandelt werden.
 
 
-\subsection{Summit Superkomputer}
-Für Betrachtungen hinsichtlich Kommunikationsfähigkeit sind Kenntnisse über die verwendeten Systeme von Nutzen.\\
-Für Umsetzungen und Benchmarking-Test der beschleunigten GPU wurde der Summit Supercomputers des Oak Ridge National Laboratories(ORNL) verwendet, zu dem sich alle Überlegungen in \cite{mainpaper} zu relativieren scheinen.
+\subsection{Summit Supercomputer}
+F"ur Betrachtungen hinsichtlich Kommunikationsf"ahigkeit sind Kenntnisse "uber die verwendeten Systeme von Nutzen.\\
+F"ur Umsetzungen und Benchmarking-Test der beschleunigten GPU wurde der Summit Supercomputers des Oak Ridge National Laboratories(ORNL) verwendet, zu dem sich alle "Uberlegungen in \cite{mainpaper} zu relativieren scheinen.
 
-Der Summit-Supercomputer im Oak Ridge National Laboratory, Tennessee, ist ein Multi-Prozessor-Supercomputer, der seit 2018 in Betrieb ist. Der Verwendungszweck des Rechners ist der Einsatz in der Wissenschaft.
+Der Summit-Supercomputer im Oak Ridge National Laboratory, Tennessee, USA, ist ein Multi-Prozessor-Supercomputer, der seit 2018 in Betrieb ist. Der Verwendungszweck des Rechners ist der Einsatz in der Wissenschaft.
 
 \subsubsection{Komponenten}
 
@@ -47,28 +46,28 @@ Der Summit-Supercomputer im Oak Ridge National Laboratory, Tennessee, ist ein Mu
 \end{figure}
 \begin{enumerate}
 	\item 4608 Knoten gesamt
-	\item je 2 CPU's (IBM POWER9, in der Graphik unter P9)
-	\item je 6 GPU's (NVIDIA Volta V100s)
+	\item je 2 CPUs (IBM POWER9, in der Graphik unter P9)
+	\item je 6 GPUs (NVIDIA Volta V100s)
 \end{enumerate} \cite{osummit}
-Abbildung \ref{fig:architecture} zeigt die generelle Systemarchitektur eines Knotens des Summit rechners.\\
-Eine CPU und 3 GPU's sind unter einem CPU-Sockel zusammengefasst. Es befinden sich 2 solcher Sockel auf einem Summit-Knoten. Zwischen allen Prozessoren unter einem Sockel existieren P2P Verbindungen mit der NVINK Verbindungstechnologie.\\
-Die Komponenten können als Stufen von Recheneinheiten angesehen werden:
+Abbildung \ref{fig:architecture} zeigt die generelle Systemarchitektur eines Knotens des Summit-Rechners.\\
+Eine CPU und 3 GPU's sind unter einem CPU-Sockel zusammengefasst. Es befinden sich 2 solcher Sockel auf einem Summit-Knoten. Zwischen allen Prozessoren unter einem Sockel existieren P2P Verbindungen mit der NVLink Verbindungstechnologie.\\
+Die Komponenten Einheiten für Rechenressourcen angesehen werden. Diese Einheiten sind:
 \begin{enumerate}
 	\item Knoten
 	\item Sockel
 	\item Prozessor
 \end{enumerate}
 
-Terminologie zur Unterscheidung von Kommunikationsformen zwischen Sockeln wird wie folgt definiert:\\
+Terminologie zur Unterscheidung von Kommunikationsvorg"angen zwischen Sockeln wird wie folgt definiert:\\
 \begin{defi}[Same-Socket-Kommunikation (eng. \textit{same-socket-communication})].
 Kommunikationsvorg"ange, welche zwischen Prozessoren unter dem selben Sockel erfolgen.
 \end{defi}
 \begin{defi}[Cross-Socket-Kommunikation (eng. \textit{cross-socket-communication})]
-Kommunikationsvorg"ange, welche zwische Prozessoren auf unterschiedlichen Sockeln erfolgen.
+Kommunikationsvorg"ange, welche zwischen Prozessoren auf unterschiedlichen Sockeln erfolgen.
 \end{defi}
-Zur Cross-Socket-Kommunikation auf einem Knoten exisitiert ein X-Bus (64GB/s), der zwischen den CPU's angelegt ist.\\
-Theoretisch k"onnen also maximal $\frac{64GB/s}{50GB/s} = 1.28$ Prozessoren cross-socket kommunizerien.\\
-Unter der Annahme, dass jeder Prozessor im Schnitt mit jedem anderen Prozess gleich viel kommuniziert  entstehen demnach Kommunikationsengp"asse zuerst bei der cross-socket Kommunikation.\\
+Für Cross-Socket-Kommunikation auf einem Knoten existiert ein X-Bus (64GB/s), der zwischen den CPUs angelegt ist.\\
+Theoretisch k"onnen also maximal $\frac{64GB/s}{50GB/s} = 1.28$ Prozessoren cross-socket kommunizieren.\\
+Unter der Annahme, dass jeder Prozessor im Schnitt mit jedem anderen Prozess gleich viel kommuniziert  entstehen demnach Kommunikationsengp"asse zuerst bei der Cross-Socket-Kommunikation.\\
 
 \subsubsection{Topologie}
 Die Knoten sind untereinander unter einer bestimmten Topologie verbunden. Am Summit-Rechner wurde die Fat-Tree Topologie verwendet.\\
@@ -80,16 +79,16 @@ Die Knoten sind untereinander unter einer bestimmten Topologie verbunden. Am Sum
 \end{figure}
 Man vergleiche im Folgendes mit Abbildung \ref{fig:fat_tree}
 Ein Fat-Tree ist eine Topologie, bei der Switches zu einem Bin"arbaum verkn"upft werden. Endknoten, also Summit-Knoten, werden dabei an den Bl"attern des Baumes platziert.\\
-Ma"sgeblich f"ur den Fat-Tree ist dabei die Regel, dass f"ur jeden Switch im System die Anzahl der Verbindungen nach unten gleich der Anzahl der Verbindungen nach oben ist, also für jeden Knoten gleich viel Bandbreite zu den Eltern wie zu der Gruppe aller Kinder verfügbar ist. Daraus folgt die Anzahl der Verbindungen pro switch in Abh"angigkeit der Baumh"ohe $h$, maximaler Baumh"ohe $h_{max}$, Der H"ohe am Wurzelknoten $h_{root}=0$ und der Anzahl der Elternverbindung eines Blattknotens $c$ (hier: $c=1$):
+Ma"sgeblich f"ur den Fat-Tree ist dabei die Regel, dass f"ur jeden Switch im System die Anzahl der Verbindungen nach unten gleich der Anzahl der Verbindungen nach oben ist, also f"ur jeden Knoten gleich viel Bandbreite zu den Eltern wie zu der Gruppe aller Kinder verf"ugbar ist. Daraus folgt die Anzahl der Verbindungen pro Switch in Abh"angigkeit der Baumh"ohe $h$, maximaler Baumh"ohe $h_{max}$, Der H"ohe am Wurzelknoten $h_{root}=0$ und der Anzahl der Elternverbindung eines Blattknotens $c$ (hier: $c=1$):
 \begin{itemize}
-	\item Anzahl Elterverbindungen/Kindverbindungen : $(h_{max}+1-h)*c$
+	\item Anzahl Elter-/Kindverbindungen : $(h_{max}+1-h)*c$
 	\item Anzahl Verbindungen pro Kind : $\frac{(h_{max}+1-h)*c}{2}$ bei 2 Kindern
 \end{itemize}
-Die Verbindungsanzahl ist daher maximal am Wurzelknoten mit $h_{max}+1$, der Baum wird zur Wurzel hin \glqq dicker (eng. \textit{fat})\grqq.\\
+Die Anzahl an Verbindungen ist daher maximal am Wurzelknoten mit $h_{max}+1$, der Baum wird zur Wurzel hin \glqq dicker (eng. \textit{fat})\grqq.\\
 H"alt eine Fat-Tree Topologie das Verh"altnis von Eltern- zu Kindverbindung von $1:1$ ein, nennt man diese Non-Blocking. Die Gegenteilige Blocking-Eigenschaft ist bei Nichteinhaltung festzustellen.\\
 Ist das Verh"altnis unausgeglichen ist die Kommunikation durch den konkreten unausgeglichenen Switch limitiert. Zum Beispiel k"onnten doppelt so viele Kindverbindungen existieren als Elternverbindungen ($1:2)$. So k"onnen verh"altnism"a"sig viele Kindknoten "uber den Switch zeitgleich kommunizieren, jedoch kann nur die H"alfte aller Kindkommunikation an Eltern weitergereicht werden. Man spricht bei diesem Beispiel von einem Blocking-Faktor von 2, Kind zu Eltern.\\
 \\
-Die Topologie erreicht durch die das exponentielle Wachstum des Bin"arbaumes mit der Baumtiefe leicht eine gro"se Anzahl verkn"upfbarer Prozessoren ($2^h_{max}$). (vgl. \cite{fattree})\\
+Die Topologie erreicht durch das exponentielle Wachstum von Blattknoten des Bin"arbaumes mit der Baumtiefe leicht eine gro"se Anzahl verkn"upfbarer Prozessoren ($2^h_{max}$). (vgl. \cite{fattree})\\
 \\
 
 
@@ -97,12 +96,12 @@ Die Topologie erreicht durch die das exponentielle Wachstum des Bin"arbaumes mit
 \cite{mainpaper} benennt einige verwendete Technologien, gibt jedoch selbst dem Leser oft wenig Kontext zu diesen. Deshalb wird im Folgenden zu diesen Technologien der Kontext hergestellt.
 
 \subsubsection{ NVLink }
-Eine proprietäre Verbindungstechnologie auf Prozessorebene, entwickelt von NVIDIA.\\
-Traditionell kommunizierten Prozessoren in einer Systemarchitektur ausschlie"slich über den PCIe-Bus. NVLink erlaubt zusätzliche P2P Verbindungen zwischen Prozessoren und erhöht daduch massiv die kommunikativen Eigenschaften der gesamten Systemarchitektur (vgl. \cite{nvlink}).\\
-Die Technologie ist besonders für die Verarbeitung von großen Datenmengen in z.B. Datenzentren wertvoll.\\
+Eine propriet"are Verbindungstechnologie auf Prozessorebene, entwickelt von NVIDIA.\\
+Traditionell kommunizierten Prozessoren in einer Systemarchitektur ausschlie"slich "uber den PCIe-Bus. NVLink erlaubt zus"atzliche P2P Verbindungen zwischen Prozessoren und erh"oht dadurch massiv die kommunikativen Eigenschaften der gesamten Systemarchitektur (vgl. \cite{nvlink}).\\
+Die Technologie ist besonders f"ur die Verarbeitung von gro"sen Datenmengen in z.B. Datenzentren wertvoll.\\
 \\
 Unidirektional bietet die Technologie bei den verwendete Prozessoren 25GB/s. Die Technologie ist allerdings konzeptionell bidirektional, wodurch die in Abbildung \ref{fig:architecture}, d.h. \cite[Abb. 1]{mainpaper} 50GB/s zu Stande kommen.\\
-\cite[FAQ, What is NVLink?]{osummit} gibt allerdings an, dass zwischen 2 Prozessoren auf einem Sockel im Summit Supercomputer 2 NVLink-Verbindungen angelegt sind, was die bandbreite theoretisch auf 100GB/s anhebt.
+\cite[FAQ, What is NVLink?]{osummit} gibt allerdings an, dass zwischen 2 Prozessoren auf einem Sockel im Summit Supercomputer 2 NVLink-Verbindungen angelegt sind, was die Bandbreite theoretisch auf 100GB/s anhebt.
 
 \subsubsection{ NVIDIA GPUDirect }
 NVIDIA GPUDirect ist eine Technologie, die den direkten Zugriff von P"aripherie auf den Speicher von NVIDIA GPU's zul"asst. Dieser Vorgang wird als \textit{Remote Direct Memory Access (RDMA)} bezeichnet.\\
@@ -116,25 +115,27 @@ Es gibt mehrere Implementierungen dieses Standards, zum Beispiel die Open-Source
 In verteilten Systemen wird MPI als Abstraktion f"ur die Kommunikation zwischen parallelen Prozessoren/Prozessen verwendet.
 
 \subsubsection{ CUDA }
-Die \textit{\textbf{C}ompute \textbf{U}nified \textbf{D}evice \textbf{A}rchitecture (CUDA)}, entwickelt von NVIDIA ist eine Plattform und Programmiermodell f"ur parallele Berechnungen auf NVIDIA GPUs (vgl. \cite{cuda}v).\\
-Die Technologie gewährt niedrigabstrakten Zugriff auf Rechenressourcen von NVIDIA Grafikprozessoren und ermöglicht so performante Implementierungen.
+Die \textit{\textbf{C}ompute \textbf{U}nified \textbf{D}evice \textbf{A}rchitecture (CUDA)}, entwickelt von NVIDIA ist eine Plattform und Programmiermodell f"ur parallele Berechnungen auf NVIDIA GPUs (vgl. \cite{cuda}).\\
+Die Technologie gew"ahrt niedrigabstrakten Zugriff auf Rechenressourcen von NVIDIA Grafikprozessoren und erm"oglicht so performante Implementierungen.
 
 \subsubsection{ CUDA-aware MPI }
 Ist eine Kombination aus CUDA und MPI.\\
-Da CUDA mit dem MPI Standard kompatibel ist, sind MPI-Implementierungen durch CUDA m"oglich. Die resultierende MPI-Implementierung ist niedrigabstakt und plattformspezifischer und soll dadurch in vielen F"allen eine bessere, performantere Umsetzung des MPI-Standards im Speziellen auf NVIDIA GPUs darstellen.
+Da CUDA mit dem MPI Standard kompatibel ist, sind MPI-Implementierungen durch CUDA m"oglich. Die resultierende MPI-Implementierung ist niedrigabstakt und plattformspezifischer und soll dadurch in vielen F"allen eine bessere, performantere Umsetzung des MPI-Standards im Speziellen f"ur NVIDIA GPUs darstellen.
 
 \subsection{Weitere Spezielle Terminologie}
 
-\subsubsection{MPI\_Alltoall}
-\textit{MPI\_Alltoall} ist eine Kommunikationsroutine des Message Passing Interfaces. Dabei Senden alle $N$ Prozesse Nachrichten der selben Gr"o"se zu allen $N$ Prozessen (inklusive dem eigenen Prozess). Der Kommunikationsaufwand betr"agt also $N^2 * Nachrichtenl"ange$.\\
+\subsubsection{MPI\_All2All}
+\textit{MPI\_Alltoall} (Auch: A2A, All2All, AllToAll) ist eine Kommunikationsroutine des Message Passing Interface Standards. Dabei Senden alle $N$ Prozesse Nachrichten der selben Gr"o"se zu allen $N$ Prozessen (inklusive dem eigenen Prozess). Der Kommunikationsaufwand betr"agt also $N^2 * Nachrichtenl"ange$.\\
 Es wird ein Kommunikationspuffer verwendet, dessen Gr"o"se $N*Nachrichtenl"ange$ betr"agt. (vgl. \cite{MPImanpage})\\
 Im Papier \cite{mainpaper} scheint eine spezielle Implementierung von MPI\_All2All f"ur den Summit Computer verwendet.
 
 \subsubsection{MPI P2P}
 Als Peer to Peer (P2P) Kommunikation bezeichnet man eine Kommunikationsstrategie, bei der alle n"otigen Informationen von einem kommunizierenden Knoten zum anderen direkt und nach Bedarf ausgetauscht werden. 
 Dabei sind die Parameter der konkreten Kommunikation prinzipiell an keine weiteren Eigenschaften gebunden.\\
-\cite{mainpaper} scheint nicht genau auf die Realisierung dieser Strategie einzugehen. Da der MPI-Standard keine P2P funktion zu definieren scheint, kann an dieser Stelle angenommen werden, dass diese Art der Kommunikation durch MPI\_Send und MPI\_Recv aufrufen realisiert wird, welche als die nativen Sendebefehle in MPI zu verstehen sind.\\
-Auch hier scheint das Papier \cite{mainpaper} wieder eine spziielle Implementierung f"ur den Summit Computer zu referenzieren.
+\cite{mainpaper} scheint nicht genau auf die Realisierung dieser Strategie einzugehen. Da der MPI-Standard keine dedizierte P2P-Funktion zu definieren scheint, kann an dieser Stelle angenommen werden, dass diese Art der Kommunikation durch MPI\_Send und MPI\_Recv aufrufen realisiert wird, welche als die nativen Sendebefehle in MPI zu verstehen sind.\\
+Es handelt sich hier bei P2P also scheinbar um Einzelnachrichten ohne eine besondere Kommunikationsstrategie.\\
+Auf einem System wie dem Summit-Rechner sollten solche Nachrichten einem Scheduling unterzogen werden.
+Auch hier scheint das Papier \cite{mainpaper} wieder eine spezielle Implementierung f"ur den Summit Computer zu referenzieren.
 
 \subsubsection{Kommunikationsrichtung}
 \begin{defi}[Unidirektionale Kommunikation (\textit{ eng. unidirectional communication })]
@@ -151,33 +152,33 @@ Der Input der 3D-FFT ist ein 3D-Tensor. Die daraufhin ben"otigten Operationen zu
 	\item \textit{pencil}\\
 		Zu Deutsch Stift, suggeriert einen eindimensional ausgedehnten Anteil am Tensor, also ein 3D Tensor mit einer der Dimensionen $\{1,1,N\},\{1,N,1\},\{N,1,1\}$.
 	\item \textit{slab}\\
-		Zu Deutsch Platte, suggeriert einen zweidimension ausgedehnten Anteil am Tensor, also ein 3D Tensor mit einer der Dimensionen $\{N,N,1\},\{N,1,N\},\{1,N,N\}$.
+		Zu Deutsch Platte, suggeriert einen zweidimensional ausgedehnten Anteil am Tensor, also ein 3D Tensor mit einer der Dimensionen $\{N,N,1\},\{N,1,N\},\{1,N,N\}$.
 \end{enumerate}
 
 \subsection{L"osungsans"atze}
 Konzeptionell gibt es 2 Optionen um Kommunikationskosten zu verringern.
 \begin{itemize}
-	\item Option1: Verwendung eines besseren Algorithmus hinsichtlich serieller Anteile und Kommunikation.
-	\item Option2: Verbesserung der Kommunikationsstrategie unter Einbeziehung von Eigenschaften der Systemarchitektur.
+	\item Option 1: Verwendung eines besseren Algorithmus hinsichtlich serieller Anteile und Kommunikation.
+	\item Option 2: Verbesserung der Kommunikationsstrategie unter Einbeziehung von Eigenschaften der Systemarchitektur.
 \end{itemize}
 
 \subsubsection{Ansatz 0}
-Benchmarks zur Ermittlung tatsächlicher Bandbreiten (hinführend zu Option 2).
+Benchmarks zur Ermittlung tats"achlicher Bandbreiten (hinf"uhrend zu Option 2).
 \begin{figure}
 \centering
 \includegraphics[width=0.6\textwidth]{res/bench0.png}
-\caption{\cite[Abb. 4]{mainpaper} Benchmark der Bandbreite für verschiedenene Möglichkeiten der P2P Kommunikation}
+\caption{\cite[Abb. 4]{mainpaper} Benchmark der Bandbreite f"ur verschiedene M"oglichkeiten der P2P Kommunikation}
 	\label{fig:bench0}
 \end{figure}
 Untersuchungen sind
 \begin{itemize}
-	\item same socket vs. cross socket
+	\item same-socket vs. cross-socket
 	\item unidirectional vs. bidirectional
-	\item p2p vs. cuda-aware MPI vs. p2p deaktiviert
+	\item p2p vs. CUDA-aware MPI vs. p2p deaktiviert
 \end{itemize}
 Ergebnisse sind in Abbildung \ref{fig:bench0} zu betrachten.\\
-Am meisten Druchsatz wurde same-socket, bidirectional über non-cuda p2p erreicht, dicht gefolgt von der cuda-aware Variante.\\
-Das Ergebnis macht theoretisch Sinn: Die zwischen den same-socket Prozessoren verwendete NVLink Verbindungstechnologie erlaubt verlustfrei bidirektionale Datenübertragung. Der theoretische Effekt von insgesamt doppelter Bandbreite ist in Abbildung \ref{fig:bench0} deutlich sichtbar.\\
+Am meisten Durchsatz wurde same-socket, bidirectional "uber non-cuda p2p erreicht, dicht gefolgt von der cuda-aware Variante.\\
+Das Ergebnis macht theoretisch Sinn: Die zwischen den same-socket Prozessoren verwendete NVLink Verbindungstechnologie erlaubt verlustfrei bidirektionale Daten"ubertragung. Der theoretische Effekt von insgesamt doppelter Bandbreite ist in Abbildung \ref{fig:bench0} deutlich sichtbar.\\
 
 
 \subsubsection{Ansatz 1}
@@ -195,7 +196,7 @@ Das Ergebnis macht theoretisch Sinn: Die zwischen den same-socket Prozessoren ve
 		\caption{\cite[Abb. 2]{mainpaper} Prinzipieller Aufbau des 3D-FFT Algorithmus. }
 		\label{fig:algo}
 	\end{subfigure}
-	\caption{Zwei begleitende Abbildungen zu Lösungsansätzen 1 und 2}
+	\caption{Zwei begleitende Abbildungen zu L"osungsans"atzen 1 und 2}
 \end{figure*}
 
 
@@ -206,34 +207,35 @@ Verwendete Strategien sind:
 	\item Summit MPI P2P
 \end{enumerate}
 Die Unterschiede sind nicht Algorithmisch. Die Untersuchung bezieht sich also auf die kommunikativen Eigenschaften der Systemarchitektur (Option 2).\\
-Ergebnis: Stategie 2 scheint f"ur geringer als 4 Knotenzahlen besser zu sein, sinkt jedoch sogar nacher weiter ab.
+Ergebnis: Strategie 2 scheint f"ur geringer als 4 Knoten besser zu sein, sinkt jedoch sogar nacher weiter ab.
 Strategie 1 scheint generell jedoch besser zu skalieren und "ubernimmt bei mehr Knoten stark die F"uhrung.\\
 \cite{mainpaper} geht jedoch selbst weiter nicht auf eine m"ogliche Begr"undung ein.\\
-Bei diesem Lösungsansatz wurde die Superiorität von All2All in Punkten Zeit und Skalierbarkeit festgestellt.\\
-Dieses Ergebnis ist theoretisch Sinnvoll, da, wie die Abbildung \ref{fig:algo} zeigt, All2All Kommunikation die Bedürfnisse der 3D-FFT Applikation nahezu exakt abbildet.\\
-Sei ein \textit{Pencil} der Länge $N$ gegeben, so erzeugt ein Prozess $N$ Werte für $N$ Folgeprozesse. Auf den Folgeprozessen wird aus den Teilergebnissen (einzelne Werte) ein neuer \textit{Pencil} der Länge $N$ zusammengefügt.\\
-In All2All Kommunikation wird ein Buffer der Länge $N$ angelegt. Dieser Buffer wird durch die 1D-FFT Operation befüllt. Die einzelnen Werte werden durch All2All an die Folgeprozesse verteilt.
+Eine spekulative Begründung ist der Einsatz von Scheduling. In einem Multi-Prozessor-System, wie dem Summit-Rechner, sollte laufende Kommunikation einem Scheduling unterzogen werden. Bei der Verwendung von P2P werden viele einzelne Nachrichten erzeugt, welche keine weiteren Regeln, Strategien oder Intentionen mitteilen. P2P Kommunikation sollte demnach mehr Last im Scheduler erzeugen als A2A, da A2A eine geregelte Strategie innehat, die dynamische Scheduling-Lasten vermindert.\\
+Bei diesem L"osungsansatz wurde die Superiorit"at von All2All in Punkten Zeit und Skalierbarkeit festgestellt.\\
+Dieses Ergebnis ist theoretisch Sinnvoll, da, wie die Abbildung \ref{fig:algo} zeigt, All2All Kommunikation die Bed"urfnisse der 3D-FFT Applikation nahezu exakt abbildet.\\
+Sei ein \textit{Pencil} der L"ange $N$ gegeben, so erzeugt ein Prozess $N$ Werte f"ur $N$ Folgeprozesse. Auf den Folgeprozessen wird aus den Teilergebnissen (einzelne Werte) ein neuer \textit{Pencil} der L"ange $N$ zusammengef"ugt.\\
+In All2All Kommunikation wird ein Buffer der L"ange $N$ angelegt. Dieser Buffer wird durch die 1D-FFT Operation bef"ullt. Die einzelnen Werte werden durch All2All an die Folgeprozesse verteilt.
 
 \subsubsection{Ansatz 2}
 Die Kommunikation kann algorithmisch ge"andert werden (Option 1).\\
 Der zuerst vorgestellte Algorithmus agiert in den Phasen:
-\begin{enumerate}
-	\item Transform X
-	\item Transform Y
-	\item Transform Z
-	\item Move Back to Original
-\end{enumerate}
+\begin{itemize}
+	\item[1] Transformiere X
+	\item[2] Transformiere Y
+	\item[3] Transformiere Z
+	\item[4] Rückbewegung in die urspr"ungliche Ausrichtung
+\end{itemize}
 (vgl. Abbildung \ref{fig:algo})\\
-Zwischen den Phasen wird kommuniziert. Die Kommunikation verh"alt sich zu den jeweiligen Phasen sequenziel, d.h. ist nicht mit einer Phase parallelisierbar, oder f"ahig zu Pipelining.\\
+Zwischen den Phasen wird kommuniziert. Die Kommunikation verh"alt sich zu den jeweiligen Phasen sequenziell, d.h.~ist nicht mit einer Phase parallelisierbar, oder f"ahig zu Pipelining.\\
 K"onnen die kommunikativen Anteile der Phasen zusammengefasst werden ergibt sich daraus weniger redundante, serielle Kommunikation.\\
 Hier wird dies in Form von \textit{Slab}-Datenkomposition durchgef"uhrt.
 Zuvor erhielten Prozesse eine Dimension des 3D-FFT-Input Datentensors, auf dem eine 1D-FFT berechnet wird. Dann werden die Ergebnisse propagiert und dabei der Tensor Transformiert.\\
 F"ur diesen Ansatz erhalten Prozesse jedoch 2 Dimensionen des 3D-FFT-Input Datentensors. Demnach kann der Prozess beispielsweise folgenderma"sen abgehandelt werden:
 \begin{itemize}
 	\item[1.1] Berechne 1D-FFT auf allen Zeilen im bekannten 2D-Tensor. Die Ergebnisse sind implizit als neuer 2D Tensor zusammengef"ugt.
-	\item[1.2] Berechne FFT's f"ur alle Spalten im Ergebnistensor.
-	\item[2.0] Transform Z
-	\item[3.0] Move Back to Original.
+	\item[1.2] Berechne FFTs f"ur alle Spalten im Ergebnistensor.
+	\item[2.0] Transformiere Z
+	\item[3.0] Rückbewegung in die urspr"ungliche Ausrichtung
 \end{itemize}
 Man beachte, dass Schritt 1.1 und 1.2 ohne Kommunikation auskommen, da alle ben"otigten Informationen in \textit{Slab}-Datenkomposition aus Schritt~1.1~in Schritt 1.2 bekannt sind.\\
 Es werden weniger Informationen redundant zwischen Phasen ausgetauscht (\textit{Pencil} 4 Phasen, \textit{Slab} 3 Phasen).\\
@@ -241,12 +243,12 @@ Ein Prozess kann also 2 Phasen der FFT Berechnung ohne Kommunikation durchf"uhre
 Theoretisch wurden demnach 25\% Kommunikationskosten eingespart.\\
 \\
 Ein Problem dabei, auf den \cite{mainpaper} nicht eingeht, ist der quadratisch erh"ohte Speicherverbrauch pro Knoten, so wie der quadratisch erh"ohte Kommunikationsaufwand in der ersten Kommunikationsphase.\\
-K"onnen die Knoten diese quadratische Speicherlast tragen ist dieser Ansatz jedoch eine solide Option. Die quadratische Kommunikation scheint sich ebenfalls nicht in den sp"ater angebenen Werten f"ur die erreichten Speedups durch die Durchf"uhrung dieses Ansatzes widerzuspiegeln.
+K"onnen die Knoten diese quadratische Speicherlast tragen ist dieser Ansatz jedoch eine solide Option. Die quadratische Kommunikation scheint sich ebenfalls nicht in den sp"ater angegebenen Werten f"ur die erreichten Speedups durch die Durchf"uhrung dieses Ansatzes widerzuspiegeln.
 
 \subsubsection{Ansatz 3}
-Vor der Ausführung des Algorithmus werden dynamische Analysen für erwartete Lasten bei der Ausf"uhrung durchgeführt. Dadurch können Berechnungsressourcen je nach Problemgröße hinsichtlich der Kommunikation optimal gewählt werden (Option 2).\\
-Man versucht dabei allokierte Ressourcen möglichst maximal auszulasten, um Kommunikation so gut wie möglich komplett zu vermeiden.\\
-Der Ansatz ist übertragbar auf die verschiedenen Stufen von Komponenten in der Systemarchitektur:
+Vor der Ausf"uhrung des Algorithmus werden dynamische Analysen f"ur erwartete Lasten bei der Ausf"uhrung durchgef"uhrt. Dadurch k"onnen Berechnungsressourcen je nach Problemgr"o"se hinsichtlich der Kommunikation optimal gew"ahlt werden (Option 2).\\
+Man versucht dabei allozierte Ressourcen m"oglichst maximal auszulasten, um Kommunikation so gut wie m"oglich komplett zu vermeiden.\\
+Der Ansatz ist "ubertragbar auf die verschiedenen Stufen von Komponenten in der Systemarchitektur:
 \begin{enumerate}
 	\item Knoten
 	\item Sockel
