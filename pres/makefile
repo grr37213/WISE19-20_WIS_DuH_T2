@@ -1,5 +1,5 @@
 MAIN_NAME:=main
-OUT_NAME:=btrg_music_genre_recog_pres.pdf
+OUT_NAME:=WIS_2019_20_DuJ_T2.pdf
 
 SRC_CONTENT := $(wildcard content/*.tex)
 SRC := $(wildcard *.tex)
