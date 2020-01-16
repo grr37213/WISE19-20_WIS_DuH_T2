@@ -6,22 +6,21 @@
 
 \section{FFT}
 
-Die schnelle Fourier-Transformation (FFT) ist ein Algorithmus von  James Cooley und John W. Tukey zur schnellen Berechnung der diskreten Fourier-Transformation. Mit dieser Transformation kann ein zeitdiskretes Signal $f(t)$ in ihre Frequenzanteile bzw. Frequenzspektrum zerlegt werden \cite[S.14]{hejobu 84}. Ein Frequenzspektrum beschreibt die Stärke der jeweiligen Frequenz im zu Grunde liegenden Signal. Um den FFT-Algorithmus zu verstehen, müssen kurz ein paar Grundlagen erklärt werden.
+Die schnelle Fourier-Transformation (FFT) ist ein Algorithmus von  James Cooley und John W. Tukey zur schnellen Berechnung der diskreten Fourier-Transformation. Mit dieser Transformation kann ein zeitdiskretes Signal $f(t)$ in ihre Frequenzanteile bzw. Frequenzspektrum zerlegt werden (\cite[S.14]{hejobu 84}). Ein Frequenzspektrum beschreibt die Stärke der jeweiligen Frequenz im zu Grunde liegenden Signal. Um den FFT-Algorithmus zu verstehen, müssen kurz ein paar Grundlagen erklärt werden.
 
 
 \subsection{Fourierreihe}
 
-Die Fourierreihe ist eine Reihenentwicklung ähnlich der Taylor-Serie, die periodische Funktionen als eine unendlich Reihe von Sinus- und Cosinus-Funktionen beliebig genau approximiert kann \cite[K. 11.4]{krenor 11}. Eine periodische Funktion muss sich in Periode T wiederholen. Dem entsprechend muss gelten:
+Die Fourierreihe ist eine Reihenentwicklung ähnlich der Taylor-Serie, die periodische Funktionen als eine unendlich Reihe von Sinus- und Cosinus-Funktionen beliebig genau approximiert kann (\cite[K. 11.4]{krenor 11}). Eine periodische Funktion muss sich in Periode T wiederholen. Dem entsprechend muss gelten:
 \begin{equation}
 f(t) = f(t + T)
 \end{equation}
-
 Die Fourierserie besitzt folgende Form:
 \begin{equation}
 f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} a_n cos \left( \frac{n2 \pi t}{T} \right) + b_n sin \left( \frac{n2 \pi t}{T} \right)
 \label{eq:fourierreihe}
 \end{equation}
-Für die Approximation müssen die Koeffizienten $a_n$ und $b_n$ berechnet werden (für die Berechnung siehe \cite[K. 11.2]{krenor 11}). Die Koeffizienten $a_n$ und $b_n$ stehen dabei im Zusammenhang mit der Amplitude der verschiedenen Frequenzen in der Reihe \cite[K. 2.5]{scho 05}. Somit lässt sich eine periodische Funktion $f(t)$ mit der Fourierreihe in ihre Teilfrequenzen zerlegen und mit Hilfe der Koeffizienten das Frequenzspektrum anzeigen lassen (siehe Abbildung \ref{fig:fourierreihe}).
+Für die Approximation müssen die Koeffizienten $a_n$ und $b_n$ berechnet werden (für die Berechnung siehe \cite[K. 11.2]{krenor 11}). Die Koeffizienten $a_n$ und $b_n$ stehen dabei im Zusammenhang mit der Amplitude der verschiedenen Frequenzen in der Reihe (\cite[K. 2.5]{scho 05}). Somit lässt sich eine periodische Funktion $f(t)$ mit der Fourierreihe in ihre Teilfrequenzen zerlegen und mit Hilfe der Koeffizienten das Frequenzspektrum anzeigen lassen (siehe Abbildung \ref{fig:fourierreihe}).
 \newline
 Die Entwicklung einer Funktion $f(t)$ kann auch als Zerlegung der Funktion in die durch trigonometrischen Basisfunktionen dargestellten Schwingungen verstanden werden und heißt Fourieranalyse.
 \begin{figure}
@@ -31,7 +30,7 @@ Die Entwicklung einer Funktion $f(t)$ kann auch als Zerlegung der Funktion in di
 \label{fig:fourierreihe}
 \end{figure} 
 \newline
-Für die Fourierreihe gibt es auch eine komplexe Darstellung. Für diese muss zuerst die eulersche Formel $e^{ix} = cos(x) + i sin(x)$ umgestellt werden:
+Die Fourierreihe besitzt auch eine komplexe Darstellung. Für diese muss zuerst die eulersche Formel $e^{ix} = cos(x) + i sin(x)$ umgestellt werden:
 \begin{equation}
 cos(x) = \frac{e^{ix} + e^{-ix}}{2}
 \label{eq:euler1}
@@ -40,29 +39,30 @@ cos(x) = \frac{e^{ix} + e^{-ix}}{2}
 sin(x) = \frac{e^{ix} - e^{-ix}}{2i}
 \label{eq:euler2}
 \end{equation}
-Nun müssen die trigonometrischen Funktion in Formel \ref{eq:fourierreihe} mit Formel \ref{eq:euler1} und \ref{eq:euler2} ersetzt werden.
+Nun müssen die trigonometrischen Funktionen in Formel \ref{eq:fourierreihe} mit Formel \ref{eq:euler1} und \ref{eq:euler2} ersetzt werden.
 Dabei entsteht folgende Gleichung:
 \begin{equation}
 f(x) = \sum_{n=-\infty}^{\infty} c_{n} e^{in2\pi x / T}
 \label{FS}
 \end{equation}
-Hierbei ist $c_n$ eine Konstante, die für die Approximation der Fourier berechnet werden muss.
+Hierbei ist $c_n$ eine Konstante, die für die Approximation der Fourierreihe berechnet werden muss.
 
 
 \subsection{Diskrete Fouriertransformation}
-Die diskrete Fouriertransformation DFT verwandelt wie die Fourierserie ein periodische Signal in ihr Frequenzspektrum um. Im Gegensatz zur Fourierreihe wird aber ein endliches zeitdiskretes Signal und kein kontinuierliches Signal verwandelt.
-Deswegen ist die DFT auch besser für Algorithmen in der Informatik geeignet, da Rechner mit diskreten Werten arbeiten. Folgende Formel zeigt wie ein zeitdiskretes Signal $x_{n} = x_{1}, x_{2},...$ in ein diskretes, periodisches Frequenzspektrum $X_{k} = X_{1}, X_{2},...$ transformiert wird \cite[S.17]{and 12}:
+Die diskrete Fouriertransformation DFT verwandelt wie die Fourierserie ein periodische Signal in ihr Frequenzspektrum um. Im Gegensatz zur Fourierreihe wird aber ein endliches zeitdiskretes Signal und kein kontinuierliches Signal transformiert.
+Dies ist von Vorteil, da in wissenschaftlichen Anwendungen häufig nur diskrete und keine kontinuierlichen Werte gemessen werden.
+Folgende Formel zeigt wie ein zeitdiskretes Signal $x_{n} = x_{1}, x_{2},...$ in ein diskretes, periodisches Frequenzspektrum $X_{k} = X_{1}, X_{2},...$ transformiert wird (\cite[S.17]{and 12}):
 \begin{equation}
 X_{k}= \sum_{n=0}^{N-1} x_{n} e^{-i2 \pi kn /N} \text{  für } k=0,...,N-1
 \label{eq:DFT}
 \end{equation}
-
-Die inverse DFT (iDFT) lautet \cite[S.20]{and 12}:
+Zum DFT existiert eine inverse DFT (iDFT). Diese transformiert das Frequenzspektrum zurück in ein zeitdiskretes Signal.
+Die iDFT lautet (\cite[S.20]{and 12}):
 \begin{equation}
 x_{k}= \frac{1}{N}\sum_{k=0}^{N-1} X_{k} e^{i2 \pi kn /N} \text{  für }  n=0,...,N-1
 \label{idft}
 \end{equation}
-Beide Formeln lassen sich aus der komplexen Formel \ref{FS} der Fourierreihe herleiten \cite[S. 77-79]{ser 17}. Die DFT lässt sich mit Hilfe der Einheitswurzel $w_{N} = e^{-2 \pi ik /N}$ in folgende Formel vereinfachen:
+Beide Formeln lassen sich aus der komplexen Formel \ref{FS} der Fourierreihe herleiten (\cite[S. 77-79]{ser 17}). Die DFT lässt sich mit Hilfe der Einheitswurzel $w_{N} = e^{-2 \pi ik /N}$ in folgende Formel vereinfachen:
 \begin{equation}
 X_{k}= \sum_{n=0}^{N-1} x_{n} w_{N}^{kn}
 \end{equation}
@@ -71,8 +71,8 @@ Mit Hilfe der Fouriermatrix $F_{N} = (w^{kn})_{k,n=0}^{N-1}$ und der Matrixschre
 X_{k} = x_{n}F_{N}
 \label{eq:dft fouriermatrix}
 \end{equation}
-Somit ist die DFT eine Matrix-Vektor-Multiplikation zwischen einem Vektor $x_n$ und der $n*n$ Fouriermatrix.
-Somit benötigt die DFT für n Elemente jeweils n Multiplikationen und für jede Multiplikation n - 1 Additionen. Es ergibt sich folgende Laufzeit: 
+Somit ist die DFT eine Matrix-Vektor-Multiplikation zwischen einem Vektor $x_n$ und der $N \times N$ Fouriermatrix.
+Somit benötigt die DFT für jedes der n Elemente jeweils n Multiplikationen und  n - 1 Additionen. Es ergibt sich folgende Laufzeit: 
 \begin{equation}
 DFT \in \mathcal O(n^2)
 \end{equation}
@@ -96,7 +96,7 @@ x_{N-1}
 \end{array}\right)
 \end{equation}
 Die Idee des Verfahrens ist es die Matrix-Vektor-Multiplikation mit $N$ Elemente auf zwei Matrix-Vektor-Multiplikation mit $\frac{N}{2}$ aufzuteilen. Durch diese Aufteilung werden Rechenoperationen eingespart. Dieser Vorgang wird solange wiederholt bis nur noch ein Element in der Matrix ist. Deswegen muss $N$ eine Zweierpotenz sein. Der Algorithmus ist somit ein Teile-Herrsche-Verfahren.
-Für das Aufteilen muss die Struktur der Fouriermatrix vereinfacht werden. Dies ist durch folgende Eigenschaften der $N$-ten Einheitswurzel möglich:
+Für das Aufteilen muss die Struktur der Fouriermatrix vereinfacht und eine Symmetrie zwischen der linken und der rechten Seite der Matrix erreicht werden. Dies ist durch folgende Eigenschaften der $N$-ten Einheitswurzel möglich:
 \begin{itemize}
 \item $w^{N/2} = -1$ \text{ für $N$ gerade}
 \item $w^{kN} = 1$
@@ -115,7 +115,7 @@ w^{0} & w^{7} & w^{14} & w^{21} & w^{28} & w^{35} & w^{42} & w^{49}\\
 \end{array} \right)
 \end{equation*}
 In Zeile 3, 5 und 7 kann in der rechten Hälfte die Eigenschaft $w^{kN} = 1$ ausgenutzt werden:
-\begin{equation}
+\begin{equation*}
 \left( \begin{array}{cccccccc}
 w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0}\\
 w^{0} & w^{1} & w^{2} & w^{3} & w^{4} & w^{5} & w^{6} & w^{7}\\
@@ -126,9 +126,9 @@ w^{0} & w^{5} & w^{10} & w^{15} & w^{20} & w^{25} & w^{30} & w^{35}\\
 w^{0} & w^{6} & w^{12} & w^{18} & w^{0} & w^{6} & w^{12} & w^{18}\\
 w^{0} & w^{7} & w^{14} & w^{21} & w^{28} & w^{35} & w^{42} & w^{49}\\
 \end{array} \right)
-\end{equation}
-In Zeile 1, 3, 5 und 7 ist die linke Hälfte gleich der rechten Hälfte.
-Im nächsten Schritt wird die rechte Hälfte der Zeilen 2, 4, 6 und 8 mit der Eigenschaft $w^{kN} = 1$ vereinfacht:
+\end{equation*}
+In Zeile 1, 3, 5 und 7 besitzt die linke Hälfte nun die gleiche Form wie die rechte Hälfte.
+Im nächsten Schritt wird die rechte Hälfte der Zeilen 2, 4, 6 und 8 ebenfalls mit der Eigenschaft $w^{kN} = 1$ vereinfacht:
 \begin{equation*}
 \left( \begin{array}{cccccccc}
 w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0}\\
@@ -141,7 +141,7 @@ w^{0} & w^{6} & w^{12} & w^{18} & w^{0} & w^{6} & w^{12} & w^{18}\\
 w^{0} & w^{7} & w^{14} & w^{21} & w^{4} & w^{11} & w^{18} & w^{25}\\
 \end{array} \right)
 \end{equation*}
-Im letzten Schritt wird in den Zeile 2, 4, 6 und 8 die Eigenschaft $w^{N/2} = -1$ benutzt und die Potenzen geschickt aufgeteilt:
+Im letzten Schritt wird in den Zeilen 2, 4, 6 und 8 die Eigenschaft $w^{N/2} = -1$ benutzt und die Potenzen geschickt aufgeteilt:
 \begin{equation*}
 \left( \begin{array}{cccccccc}
 w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0}\\
@@ -155,7 +155,7 @@ w^{0}w^{0} & w^{1}w^{6} & w^{2}w^{12} & w^{3}w^{18} & -w^{0}w^{0} & -w^{1}w^{6} 
 \end{array} \right)
 \end{equation*} 
 Nun erkennt man, dass sich die Einträge in Zeile 1, 3, 5 und 7 auf der rechten Seite wiederholen. In den Zeilen 2, 4, 6, 8 wiederholt sich die rechte Seite ebenfalls. Allerdings muss hier noch der Vorfaktor mit beachtet werden.
-Nun kann folgende Multiplikation 
+Durch die Symmetrie von der linken und rechten Seite der Matrix kann folgende Multiplikation 
 \begin{equation*}
 \left( \begin{array}{cccccccc}
 w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0} & w^{0}\\
@@ -243,28 +243,28 @@ Im Schmetterlingsdiagram in Abb. \ref{fig:schmetterlingsdiagram} wird der Algori
 Hier zu erkennen, dass am Ende die Elemente noch richtig sortiert werden müssen. 
 
 \section{3D FFT}
-Die 3 dimensionale FFT (3D FFT) wird in vielen verschiedenen Anwendungsbereichen benötigt.
-In der Molekulardynamik zum Beispiel werden Simulationen von den physikalischen Bewegungen der Atome und Moleküle durchgeführt. Mit Hilfe des 3D FFT wird die Komplexität dieser Simulation verringert \cite[S.1]{shahe 14}.
+Die 3 dimensionale FFT (3D-FFT) wird in vielen verschiedenen Anwendungsbereichen benötigt.
+In der Molekulardynamik zum Beispiel werden Simulationen von den physikalischen Bewegungen der Atome und Moleküle durchgeführt. Mit Hilfe des 3D-FFT wird die Komplexität dieser Simulation verringert (\cite[S.1]{shahe 14}).
 \newline
-Die 3D DFT ist definiert als \cite[S.4]{sig 07}:
+Die 3D-DFT ist definiert als (\cite[S.4]{sig 07}):
 \begin{equation}
 F(k_x,k_y, k_z)= \sum_{j_x=0}^{N-1} \sum_{j_y=0}^{N-1} \sum_{j_x=0}^{N-1} 
 f(j_x,j_y, j_z) e^{-2 \pi i \left( \frac{k_x j_x}{N_x} + \frac{k_y j_y}{N_y} + \frac{k_z j_z}{N_z} \right)}
 \label{3dfft}
 \end{equation}
-Hierbei ist $f(x, y, z)$ ein 3 dimensionales Input-Array mit der Größe $N_x * N_y * N_z$ und $F(k_x,k_y, k_z)$ ein 3 dimensionales Output-Array.
+Hierbei ist $f(x, y, z)$ ein 3 dimensionales Input-Array mit der Größe $N_x \times N_y \times N_z$ und $F(k_x,k_y, k_z)$ ein 3 dimensionales Output-Array.
 Formel \ref{3dfft} kann in die folgende Form umgeschrieben werden:
 \begin{equation}
 F(k_x,k_y, k_z)= \sum_{j_x=0}^{N-1} \left( \sum_{j_y=0}^{N-1} \left( \sum_{j_x=0}^{N-1} 
 f(j_x,j_y, j_z) e^{-2 \pi i \left( \frac{k_z j_z}{N_z} \right)} \right) e^{-2 \pi i \left( \frac{k_y j_y}{N_y} \right)} \right) e^{-2 \pi i \left( \frac{k_x j_x}{N_x} \right)}
 \end{equation}
-Dies zeigt das der drei dimensionale Fall als drei seperate ein dimesionale DFT berechent werden kann. Zuerst wird die DFT über die Z-Dimension berechnet. Dies führt zu folgenden Resultat:
+Dies zeigt das der 3-dimensionale Fall als drei seperate 1-dimesionale DFTs berechnet werden kann. Zuerst wird die DFT über die Z-Dimension berechnet. Dies führt zu folgenden Resultat:
 \begin{equation}
 F(j_x,j_y, k_z)=\sum_{j_x=0}^{N-1} 
 f(j_x,j_y, j_z) e^{-2 \pi i \left( \frac{k_z j_z}{N_z} \right)}
 \label{eq3dz}
 \end{equation}
-Die gleiche Methode wird auf die Y-Dimenstion angewendet:
+Die gleiche Methode wird auf die Y-Dimension angewendet:
 \begin{equation}
 F(j_x,k_y, k_z)=\sum_{j_x=0}^{N-1} 
 f(j_x,j_y, j_z) e^{-2 \pi i \left( \frac{k_y j_y}{N_y} \right)}
@@ -276,26 +276,26 @@ F(k_x,k_y, k_z)=\sum_{j_x=0}^{N-1}
 f(j_x,j_y, j_z) e^{-2 \pi i \left( \frac{k_x j_x}{N_x} \right)}
 \label{eq3dx}
 \end{equation}
-Die Reihenfolge der Dimensionen ist nicht relevant für die 3D DFT \cite[S.3-4]{sig 07}.
-Die einzelnen 1D DFT können nun mit dem 1D FFT berechnet werden.
+Die Reihenfolge der Dimensionen ist nicht relevant für die 3D-DFT (\cite[S.3-4]{sig 07}).
+Die einzelnen 1D-DFTs können mit dem 1D-FFT berechnet werden.
 
 \section{FFT-ECP Implementierung}
-Das FFT-ECP Projekt soll eine nachhaltige 3D FFT Bibliothek für verteilte-heterogene parallele Systeme zur Verfügung stellen. Dies wird von dem Exascale Computing Project (ECP), welches vom US Department of Energy finanziert wird, entwickelt \cite[S. 1]{sha 19}. 
+Das FFT-ECP Projekt soll eine nachhaltige 3D-FFT Bibliothek für verteilte-heterogene parallele Systeme zur Verfügung stellen. Dies wird von dem Exascale Computing Project (ECP), welches vom US Department of Energy finanziert wird, entwickelt (\cite[S. 1]{sha 19}). 
 \newline
 FFT-ECP basiert auf FFTMPI, eine CPU-FFT Bibliothek, die von dem Sandia National Laboratory entwickelt wurde. Diese Bibliothek kann 3D- oder 2D-FFTs parallel auf verteilten Prozessoren durchführen. Momentan werden GPUs nicht unterstützt. Ein wichtiges Feature von FFTMPI ist die Flexilibität des Input- und Output-Layers \cite[S.2]{sha 19}. 
 \newline
-Der Algorithmus für die 3D FFT schaut wie folgt aus:
+Der Algorithmus für die 3D-FFT schaut wie folgt aus:
 \newline
-Der 3D FFT Algorithmus basiert auf der sogenannten Pencil decomposition \cite[S.1-2]{aya 19}.
-Die Input-Daten sind ein 3D Tensor mit folgende Dimensionen $N_{x} * N_{y} * N_{z}$ (siehe Abb. \ref{fig:pencildecomposition} a). Die Daten werden auf einem Gitter von $P$ Prozessen verteilt, $P=P_0 * P_1 * P_1$. Wie im vorherigen Kapitel beschrieben, kann die 3D FFT in drei seperate 1D FFT aufgeteilt werden. Dazu müssen die Daten in sogenannte Pencils umgeformt werden. 
+Der 3D-FFT Algorithmus basiert auf der sogenannten Pencil Decomposition (\cite[S.1-2]{aya 19}).
+Die Input-Daten sind ein 3D Tensor mit folgende Dimensionen $N_{x} \times N_{y} \times N_{z}$ (siehe Abb. \ref{fig:pencildecomposition} a). Die Daten werden auf einem Gitter von $P$ Prozessen verteilt, $P=P_0 \times P_1 \times P_2$. Wie im vorherigen Kapitel beschrieben, kann die 3D-FFT in drei seperate 1D-FFT aufgeteilt werden. Dazu müssen die Daten in sogenannte Pencils umgeformt werden. 
 \newline
-Im ersten Schritt werden die Pencils entlang der X-Achse geformt (siehe Abb. \ref{fig:pencildecomposition} b). Die Pencils werden auf die $P$ Prozesse verteilt und mit 1D FFTs berechnet. Es müssen $N_y * N_{z}$ FFTs berechnet werden. Danach müssen die Daten wieder umgeformt werden. 
+Im ersten Schritt werden die Pencils entlang der X-Achse geformt (siehe Abb. \ref{fig:pencildecomposition} b). Die Pencils werden auf die $P$ Prozesse verteilt und mit 1D-FFTs berechnet. Es müssen $N_y \times N_{z}$ FFTs berechnet werden. Danach müssen die Daten wieder umgeformt werden. 
 \newline
-Im zweiten Schritt werden Pencils entlang der Y-Achse gebildet (siehe Abb. \ref{fig:pencildecomposition} c). Die Pencils werden wieder auf die $P$ Prozesse verteilt und es werden $N_x * N_z$ 1D FFTs berechnet. 
+Im zweiten Schritt werden Pencils entlang der Y-Achse gebildet (siehe Abb. \ref{fig:pencildecomposition} c). Die Pencils werden wieder auf die $P$ Prozesse verteilt und es werden $N_x \times N_z$ 1D-FFTs berechnet. 
 \newline
-Im dritten Schritt werden die Daten in Pencils entlang der Z-Achse umgeformt, verteilt und $N_x * N_y$ 1D FFTs berechnet (siehe Abb. \ref{fig:pencildecomposition} d). Zum Schluss werden die Daten noch einmal umgeformt, um sie in die Originalform zu bringen. 
+Im dritten Schritt werden die Daten in Pencils entlang der Z-Achse umgeformt, verteilt und $N_x \times N_y$ 1D-FFTs berechnet (siehe Abb. \ref{fig:pencildecomposition} d). Zum Schluss werden die Daten noch einmal umgeformt, um sie in die Originalform zu bringen. 
 \newline
-Der Algorithmus benötigt somit 4 Phasen zum Umformen der Daten und 3 Phasen zum Berechnen der 1D FFTs. Das Umformen der Daten basiert auf dem Message Passing Interface(MPI). Die 1D FFTs werden von externen Bibliotheken berechnet.
+Der Algorithmus besitzt somit 4 Phasen fürs Umformen der Daten und 3 Phasen fürs Berechnen der 1D-FFTs. Das Umformen der Daten basiert auf dem Message Passing Interface(MPI). Die 1D-FFTs werden von externen Bibliotheken berechnet.
 
 \begin{figure}
 \centering
