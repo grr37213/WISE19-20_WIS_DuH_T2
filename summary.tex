@@ -1,4 +1,4 @@
 Die schnelle Fouriertransformation verringert die Laufzeit der diskreten Fouriertransformation von $\mathcal O(n^2)$ auf $\mathcal O(n \log n)$. Da 3D-FFTs mit Hilfe von 1D-FFTs berechnet werden, wird die Laufzeit der  3D-Fouriertransformation ebenfalls verringert. 
 \newline
-Durch die Verwendung von GPUs anstatt CPUs und massiver Parallelität ist eine bis zu 40-fache Beschleunigung der 3D-FFTs möglich. Dabei besteht die Laufzeit auf der GPU zu über 90 Prozent aus Kommunikation, die zum Umformen der Daten notwendig ist. Deshalb kann durch eine geeignete Wahl der Kommunikationsstrategie und des Algorithmus mit geringem Kommunikationsaufwand die Laufzeit noch einmal stark verringert werden.
+Durch die Verwendung von GPUs anstatt CPUs und massiver Parallelität ist eine bis zu 40-fache Beschleunigung der 3D-FFTs möglich. Durch diese Beschleunigung der Berechnung wird Kommunikation im Multi-Prozessorsystem jedoch zum Berechnungsengpass. Dieser Engpass kann durch eine geeignete Wahl der Kommunikationsstrategie und vorteilhafte Änderung des verwendeten Algorithmus für bessere Kommunikationseigenschaften mitigiert werden.
 
