@@ -106,10 +106,10 @@ Auf der Website des Summit-Rechners wird allerdings angegeben, dass zwischen 2 P
 Es besteht daher eine Diskrepanz zwischen den Quellen.
 
 \subsubsection{ NVIDIA GPUDirect }
-NVIDIA GPUDirect ist eine Technologie, die den direkten Zugriff den Speicher von NVIDIA GPUs zulässt, ohne den traditionellen Weg über den CPU-RAM nehmen zu müssen. Dieser Vorgang wird als \textit{Remote Direct Memory Access (RDMA)} bezeichnet.\\
+NVIDIA GPUDirect-Storage ist Term für Speichersysteme auf NVIDIA Grafikkarten, die den direkten Speicherzugriff bei Grafikkarten ohne den traditionellen Umweg über den CPU-RAM ermöglichen. Dieser Vorgang wird als \textit{Remote Direct Memory Access (RDMA)} bezeichnet.\\
 Es können dabei verschiedene Arten von Päripherie verbunden werden, welche dann direkt GPU-Speicher lesen und schreiben können. Somit können die Päriperien direkt mit den GPUs kommunizieren.\\
 Beispiele für Päripherien sind Netzwerkadapter, Speicher (wie Solid State Drives) und andere Graphikkarten (vgl. \cite{gpud}).\\
-Die GPUDirect Technologie wir am Summit zur Beschleunigung von MPI-Kommunikation eingesetzt (vgl. \cite[Kap. 1]{mainpaper}).
+Die GPUDirect Technologie wir am Summit zur Beschleunigung von MPI-Kommunikation zwischen Grafikkarten eingesetzt (vgl. \cite[Kap. 1]{mainpaper}).
 
 \subsubsection{ \textit{Message Passing Interface} (MPI) }
 MPI ist ein Standard, der Schnittstellen für den Nachrichtenaustausch zwischen Prozessen spezifiziert.\\
