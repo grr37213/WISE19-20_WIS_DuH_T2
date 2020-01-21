@@ -36,17 +36,20 @@
 }
 \frame
 {
-	\frametitle{Systemarchitektur}
+	\frametitle{Systemarchitektur: ORNL Summit}
+	\tiny Summit Supercomputer im Oak Ridge National Laboratory, Tennessee, USA\normalsize
 	\begin{figure}[h!]
 		\centering
 		\begin{subfigure}[t]{0.3\linewidth}
 			\includegraphics[width=1\linewidth]{../res/fat_tree.png}
 			\footnotemark[1]
+			\caption{Fat-Tree}
 		\end{subfigure}
 ~
-		\begin{subfigure}[t]{0.6\linewidth}
+		\begin{subfigure}[t]{0.5\linewidth}
 			\includegraphics[width=1\linewidth]{../res/architecture.png}
 			\footnotemark[2]
+			\caption{Knotenarchitektur}
 		\end{subfigure}
 	\end{figure}
 
@@ -54,10 +57,41 @@
 \footnotetext[2]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
 \normalsize
 }
+
 \frame
 {
-	\frametitle{Ansatz 0}
-	Benchmarks zur Ermittlung der tatsächlichen Bandbreite.
+	\frametitle{MPI/CUDA}
+\begin{itemize}
+	\item[] MPI\footnotemark[1]: \textbf{M}essage \textbf{P}assing \textbf{I}nterface
+	Standardisierte Kommunikationsschnittstelle zwischen Prozessen, hier im Kontext von Multiprozessorsystemen
+\item[] CUDA\footnotemark[2]: Parallele Berechnungsplattform un Programmiermodel von NVIDIA für allgemeine Berechnungen auf NVIDIA GPUs.
+\end{itemize}
+	\footnotetext[2]{https://developer.nvidia.com/cuda-zone}
+}
+\frame
+{
+	\frametitle{NVLink}
+	\begin{figure}
+	\begin{subfigure}[t]{0.4\linewidth}
+			\includegraphics[width=1\linewidth]{../res/nvlink0.png}
+			\caption{Traditionelle Architektur}
+			\footnotemark[1]
+	\end{subfigure}
+~
+	\begin{subfigure}[t]{0.4\linewidth}
+			\includegraphics[width=1\linewidth]{../res/nvlink1.png}
+			\caption{NVLink Architektur}
+			\footnotemark[1]
+		\end{subfigure}
+	\end{figure}
+	Stichwörter: GPUDirect (Remote Direct Memory Access), CUDA-aware MPI
+	\footnotetext[1]{https://en.wikichip.org/wiki/nvidia/nvlink}
+}
+
+\frame
+{
+	\frametitle{Ermittlung tatsächlicher Bandbreiten}
+	$\rightarrow$ Benchmarks nach Option 2
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/bench0.png}
@@ -67,8 +101,8 @@
 }
 \frame
 {
-	\frametitle{Ansatz 1}
-	Nach Option2: Untersuchung Kommunikativer Eigenschaften der Systemarchitektur
+	\frametitle{Untersuchung verschiedener Kommunikationsstrategien}
+	nach Option 2
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/bench.png}
@@ -78,8 +112,8 @@
 }
 \frame
 {
-	\frametitle{Ansatz 2}
-	Nach Option1: Algorithmische Anpassung
+	\frametitle{Algorithmische Änderungen: Slabs}
+	nach Option 1
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/algo.png}
@@ -87,14 +121,14 @@
 	\end{figure}
 	1D\textit{pencil} $\rightarrow$ 2D\textit{slabs} Übertragungsgröße
 	$(TransformX,TransformY,TransformZ,MoveBack)\rightarrow(TransformY,TransformZ,MoveBack)$
-	Theretisch: $25\%$ Ersparnis
+	Theoretisch: $25\%$ Ersparnis
 
 \footnotetext[1]{\tiny Shajek H., Tomov S., Ayala A., Haidar A., Dongarra J:\\{\sl GPUDirect MPI Communications and Optimizations to Accelerate FFTs on Exascale Systems};\\EuroMPI ’19 Posters, September 11-13, 2019, Zurich, Switzerland}
 }
 
 \frame
 {
-	\frametitle{Ansatz 2}
+	\frametitle{Algorithmische Änderungen: Slabs}
 	\begin{figure}[h!]
 		\centering
 		\includegraphics[width=0.7\linewidth, keepaspectratio]{../res/bench2.png}
@@ -106,17 +140,17 @@
 }
 \frame
 {
-	\frametitle{Ansatz 3}
+	\frametitle{Dynamische Analysen}
 	Dynamische Analysen hinsichtlich
 	\begin{itemize}
 		\item Speicherverbrauch
 		\item Rechenlast
 	\end{itemize}
-	zur optimalen Auslastung und Aufteilung auf die Einheiten von Rechenressourcen 
+	zur optimalen Auslastung und Aufteilung auf die Einheiten von Rechenressourcen vor der Ausführung des Algorithmus
 	\begin{enumerate}
 		\item{Knoten}
 		\item{Sockel}
 		\item{Prozessor}
 	\end{enumerate}
-	$\implies$ Vermeidung unnötiger Kommunikation.
+	$\implies$ Vermeidung unnötiger Kommunikation oder Kommunikation über langsame Kommunikationswege.
 }
