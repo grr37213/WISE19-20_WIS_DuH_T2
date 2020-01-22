@@ -6,7 +6,7 @@
 
 \section{FFT}
 
-Die schnelle Fourier-Transformation (FFT) ist ein Algorithmus von  James Cooley und John W. Tukey zur schnellen Berechnung der diskreten Fourier-Transformation. Mit dieser Transformation kann ein zeitdiskretes Signal $f(t)$ in ihre Frequenzanteile bzw. Frequenzspektrum zerlegt werden (\cite[S.14]{hejobu 84}). Ein Frequenzspektrum beschreibt die Stärke der jeweiligen Frequenz im zu Grunde liegenden Signal. Um den FFT-Algorithmus zu verstehen, müssen kurz ein paar Grundlagen erklärt werden.
+Die schnelle Fourier-Transformation (FFT) ist ein Algorithmus von  James Cooley und John W. Tukey zur schnellen Berechnung der diskreten Fourier-Transformation. Mit dieser Transformation kann ein zeitdiskretes Signal $f(t)$ in seine Frequenzanteile bzw. Frequenzspektrum zerlegt werden (\cite[S.14]{hejobu 84}). Ein Frequenzspektrum beschreibt die Stärke der jeweiligen Frequenz im zu Grunde liegenden Signal. Um den FFT-Algorithmus zu verstehen, müssen kurz ein paar Grundlagen erklärt werden.
 
 
 \subsection{Fourierreihe}
@@ -15,7 +15,7 @@ Die Fourierreihe ist eine Reihenentwicklung ähnlich der Taylor-Serie, die perio
 \begin{equation}
 f(t) = f(t + T)
 \end{equation}
-Die Fourierserie besitzt folgende Form:
+Die Fourierreihe besitzt folgende Form:
 \begin{equation}
 f(t) = \frac{a_0}{2} + \sum_{n=1}^{\infty} a_n cos \left( \frac{n2 \pi t}{T} \right) + b_n sin \left( \frac{n2 \pi t}{T} \right)
 \label{eq:fourierreihe}
@@ -49,14 +49,14 @@ Hierbei ist $c_n$ eine Konstante, die für die Approximation der Fourierreihe be
 
 
 \subsection{Diskrete Fouriertransformation}
-Die diskrete Fouriertransformation DFT verwandelt wie die Fourierserie ein periodische Signal in ihr Frequenzspektrum um. Im Gegensatz zur Fourierreihe wird aber ein endliches zeitdiskretes Signal und kein kontinuierliches Signal transformiert.
+Die diskrete Fouriertransformation DFT verwandelt wie die Fourierreihe ein periodische Signal in ihr Frequenzspektrum um. Im Gegensatz zur Fourierreihe wird aber ein endliches zeitdiskretes Signal und kein kontinuierliches Signal transformiert.
 Dies ist von Vorteil, da in wissenschaftlichen Anwendungen häufig nur diskrete und keine kontinuierlichen Werte gemessen werden.
 Folgende Formel zeigt wie ein zeitdiskretes Signal $x_{n} = x_{1}, x_{2},...$ in ein diskretes, periodisches Frequenzspektrum $X_{k} = X_{1}, X_{2},...$ transformiert wird (\cite[S.17]{and 12}):
 \begin{equation}
 X_{k}= \sum_{n=0}^{N-1} x_{n} e^{-i2 \pi kn /N} \text{  für } k=0,...,N-1
 \label{eq:DFT}
 \end{equation}
-Zum DFT existiert eine inverse DFT (iDFT). Diese transformiert das Frequenzspektrum zurück in ein zeitdiskretes Signal.
+Zur DFT existiert eine inverse DFT (iDFT). Diese transformiert das Frequenzspektrum zurück in ein zeitdiskretes Signal.
 Die iDFT lautet (\cite[S.20]{and 12}):
 \begin{equation}
 x_{k}= \frac{1}{N}\sum_{k=0}^{N-1} X_{k} e^{i2 \pi kn /N} \text{  für }  n=0,...,N-1
@@ -95,7 +95,7 @@ x_1\\
 x_{N-1}
 \end{array}\right)
 \end{equation}
-Die Idee des Verfahrens ist es die Matrix-Vektor-Multiplikation mit $N$ Elemente auf zwei Matrix-Vektor-Multiplikation mit $\frac{N}{2}$ aufzuteilen. Durch diese Aufteilung werden Rechenoperationen eingespart. Dieser Vorgang wird solange wiederholt bis nur noch ein Element in der Matrix ist. Deswegen muss $N$ eine Zweierpotenz sein. Der Algorithmus ist somit ein Teile-Herrsche-Verfahren.
+Die Idee des Verfahrens ist es die Matrix-Vektor-Multiplikation mit $N$ Elementen auf zwei Matrix-Vektor-Multiplikation mit $\frac{N}{2}$ Elementen aufzuteilen. Durch diese Aufteilung werden Rechenoperationen eingespart. Dieser Vorgang wird solange wiederholt bis nur noch ein Element in der Matrix ist. Deswegen muss $N$ eine Zweierpotenz sein. Der Algorithmus ist somit ein Teile-Herrsche-Verfahren.
 Für das Aufteilen muss die Struktur der Fouriermatrix vereinfacht und eine Symmetrie zwischen der linken und der rechten Seite der Matrix erreicht werden. Dies ist durch folgende Eigenschaften der $N$-ten Einheitswurzel möglich:
 \begin{itemize}
 \item $w^{N/2} = -1$ \text{ für $N$ gerade}
@@ -233,6 +233,7 @@ b_8\\
 \end{array} \right)
 \end{equation*} 
 Beide Matrizen besitzen wieder die Form einer Fouriermatrix und können wieder aufgeteilt werden, bis nur noch ein Element in der Matrix ist.
+\newline
 Im Schmetterlingsdiagram in Abb. \ref{fig:schmetterlingsdiagram} wird der Algorithmus noch einmal zusammengefasst.
 \begin{figure}
 \centering
@@ -240,7 +241,8 @@ Im Schmetterlingsdiagram in Abb. \ref{fig:schmetterlingsdiagram} wird der Algori
 \caption{Schmetterlingsdiagramm}
 \label{fig:schmetterlingsdiagram}
 \end{figure} 
-Hier zu erkennen, dass am Ende die Elemente noch richtig sortiert werden müssen. 
+Hier ist zu erkennen wie der Eingabevektor aufgeteilt wird und im nächsten Schritt zwei FFTs mit 4 Eingabevariablen berechnet werden (als $FFT_4$ gekennzeichnet).
+Zum Schluss müssen die Elemente noch richtig sortiert werden. 
 
 \section{3D FFT}
 Die 3 dimensionale FFT (3D-FFT) wird in vielen verschiedenen Anwendungsbereichen benötigt.
@@ -280,11 +282,11 @@ Die Reihenfolge der Dimensionen ist nicht relevant für die 3D-DFT (\cite[S.3-4]
 Die einzelnen 1D-DFTs können mit dem 1D-FFT berechnet werden.
 
 \section{FFT-ECP Implementierung}
-Das FFT-ECP Projekt soll eine nachhaltige 3D-FFT Bibliothek für verteilte-heterogene parallele Systeme zur Verfügung stellen. Dies wird von dem Exascale Computing Project (ECP), welches vom US Department of Energy finanziert wird, entwickelt (\cite[S. 1]{sha 19}). 
+Das FFT-ECP Projekt soll eine nachhaltige 3D-FFT Bibliothek für verteilte-heterogene parallele Systeme zur Verfügung stellen. Dies wird von dem Exascale Computing Project (ECP), welches vom US Department of Energy finanziert wird, entwickelt (\cite[S. 1]{mainpaper}). 
 \newline
-FFT-ECP basiert auf FFTMPI, eine CPU-FFT Bibliothek, die von dem Sandia National Laboratory entwickelt wurde. Diese Bibliothek kann 3D- oder 2D-FFTs parallel auf verteilten Prozessoren durchführen. Momentan werden GPUs nicht unterstützt. Ein wichtiges Feature von FFTMPI ist die Flexilibität des Input- und Output-Layers \cite[S.2]{sha 19}. 
+FFT-ECP basiert auf FFTMPI, eine CPU-FFT Bibliothek, die von dem Sandia National Laboratory entwickelt wurde. Diese Bibliothek kann 3D- oder 2D-FFTs parallel auf verteilten Prozessoren durchführen. Momentan werden GPUs nicht unterstützt. Ein wichtiges Feature von FFTMPI ist die Flexilibität des Input- und Output-Layers \cite[S.2]{mainpaper}. 
 \newline
-Der Algorithmus für die 3D-FFT schaut wie folgt aus:
+Der Algorithmus für die 3D-FFT sieht wie folgt aus:
 \newline
 Der 3D-FFT Algorithmus basiert auf der sogenannten Pencil Decomposition (\cite[S.1-2]{aya 19}).
 Die Input-Daten sind ein 3D Tensor mit folgende Dimensionen $N_{x} \times N_{y} \times N_{z}$ (siehe Abb. \ref{fig:pencildecomposition} a). Die Daten werden auf einem Gitter von $P$ Prozessen verteilt, $P=P_0 \times P_1 \times P_2$. Wie im vorherigen Kapitel beschrieben, kann die 3D-FFT in drei seperate 1D-FFT aufgeteilt werden. Dazu müssen die Daten in sogenannte Pencils umgeformt werden. 
@@ -295,7 +297,7 @@ Im zweiten Schritt werden Pencils entlang der Y-Achse gebildet (siehe Abb. \ref{
 \newline
 Im dritten Schritt werden die Daten in Pencils entlang der Z-Achse umgeformt, verteilt und $N_x \times N_y$ 1D-FFTs berechnet (siehe Abb. \ref{fig:pencildecomposition} d). Zum Schluss werden die Daten noch einmal umgeformt, um sie in die Originalform zu bringen. 
 \newline
-Der Algorithmus besitzt somit 4 Phasen fürs Umformen der Daten und 3 Phasen fürs Berechnen der 1D-FFTs. Das Umformen der Daten basiert auf dem Message Passing Interface(MPI). Die 1D-FFTs werden von externen Bibliotheken berechnet.
+Der Algorithmus besitzt somit 4 Phasen fürs Umformen der Daten und 3 Phasen fürs Berechnen der 1D-FFTs. Die 1D-FFTs werden von externen Bibliotheken, welche die beste Performance bieten, wie Intel MKL FFT oder FFTW berechnet.
 
 \begin{figure}
 \centering
